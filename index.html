@@ -391,18 +391,18 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxjbaygQzxTA4fYzT1lw
 let course = null, supplies = [], itemCount = 0;
 let loginMode = 'prof';
 let univCourses = [], univName = '';
-let YEAR = '2026', TERM = '여름방학';  // 설정 시트에서 덮어씀
+let YEAR = '2026', TERM = '여름방학', DEADLINE = '4월 21일';
 
 // ── 설정 로드 (페이지 시작 시) ──────────────────────
 async function loadSettings() {
   try {
     const res = await api({ action: 'getSettings' });
     if (res.ok) {
-      YEAR = res.year;
-      TERM = res.term;
+      YEAR     = res.year;
+      TERM     = res.term;
+      DEADLINE = res.deadline || '4월 21일';
     }
   } catch(e) {}
-  // 헤더 업데이트
   document.querySelector('.header h1').textContent = '꿈키움 준비물 신청 시스템';
   document.getElementById('headerDesc').textContent = `${YEAR}학년도 ${TERM}`;
 }
@@ -528,7 +528,7 @@ function renderMain(delivery) {
 
 function renderStatus() {
   const map = {
-    '개설예정': { cls:'sb-pending', icon:'📋', title:'수강신청 집계 중', desc:'4월 21일 이후 수강인원 및 예산이 확정됩니다.' },
+    '개설예정': { cls:'sb-pending', icon:'📋', title:'수강신청 집계 중', desc:`${DEADLINE} 이후 수강인원 및 예산이 확정됩니다.` },
     '개설확정': { cls:'sb-open', icon:'✅', title:'강좌 개설 확정', desc:`수강인원 ${course.students}명 · 가용예산 ${fmt(course.budget)}원` },
     '폐강':     { cls:'sb-closed', icon:'🚫', title:'폐강 강좌', desc:'수강신청 인원 미달로 폐강되었습니다. 준비물 신청이 불가합니다.' },
   };
