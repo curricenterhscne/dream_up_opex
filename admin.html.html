@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>꿈키움 준비물 관리</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f0f2f8;--card:#fff;--sb:#1e2140;--sbt:#a8b0cc;--sba:#fff;
+  --accent:#4f63d2;--al:#eef0fc;
+  --ok:#16a34a;--okb:#dcfce7;--warn:#b45309;--warnb:#fef3c7;
+  --err:#dc2626;--errb:#fee2e2;
+  --text:#1e1e2e;--sub:#6b7280;--border:#e5e7eb;--r:10px;--sh:0 1px 4px rgba(0,0,0,.08)
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text)}
+
+/* 로그인 */
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1e2140,#2d3466)}
+.login-box{background:#fff;border-radius:16px;padding:36px;width:360px;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.login-box h1{font-size:19px;font-weight:700;margin-bottom:3px}
+.login-box p{font-size:12px;color:var(--sub);margin-bottom:20px}
+.tab-row{display:flex;border:1.5px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:18px}
+.tab{flex:1;padding:8px;text-align:center;font-size:12px;cursor:pointer;transition:.15s;color:var(--sub)}
+.tab.on{background:var(--accent);color:#fff;font-weight:700}
+.fg{margin-bottom:12px}
+.fg label{display:block;font-size:12px;font-weight:500;color:var(--sub);margin-bottom:4px}
+.fg input{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;outline:none;transition:.15s}
+.fg input:focus{border-color:var(--accent)}
+.btn-login{width:100%;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.btn-login:hover{background:#3d50c0}
+.err-msg{color:var(--err);font-size:12px;margin-top:8px;text-align:center}
+
+/* 앱 */
+.app{display:none;min-height:100vh}
+.app.on{display:flex}
+.sidebar{width:220px;background:var(--sb);flex-shrink:0;display:flex;flex-direction:column;padding:22px 0}
+.sidebar .logo{padding:0 18px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sidebar .logo h1{font-size:13px;font-weight:700;color:#fff;line-height:1.5}
+.sidebar .logo p{font-size:11px;color:var(--sbt);margin-top:2px}
+.role-badge{margin-top:7px;background:rgba(255,255,255,.12);border-radius:6px;padding:3px 9px;font-size:11px;color:#d1d5f0;display:inline-block}
+.sidebar nav{flex:1;padding:14px 0}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 18px;color:var(--sbt);cursor:pointer;font-size:12px;transition:.15s;border-left:3px solid transparent}
+.nav-item:hover{color:#fff;background:rgba(255,255,255,.05)}
+.nav-item.on{color:var(--sba);background:rgba(255,255,255,.08);border-left-color:#4f63d2}
+.nav-item .icon{font-size:15px;width:18px;text-align:center}
+.sidebar .uinfo{padding:14px 18px;border-top:1px solid rgba(255,255,255,.08);font-size:11px;color:var(--sbt)}
+.sidebar .uinfo strong{color:#fff;display:block;margin-bottom:2px}
+
+.main{flex:1;overflow-y:auto;padding:22px}
+.ph{margin-bottom:18px}
+.ph h2{font-size:19px;font-weight:700}
+.ph p{font-size:12px;color:var(--sub);margin-top:3px}
+
+.card{background:var(--card);border-radius:var(--r);padding:18px;margin-bottom:14px;box-shadow:var(--sh)}
+.sec-title{font-size:13px;font-weight:700;margin-bottom:12px}
+
+/* 통계 */
+.stat-row{display:grid;gap:12px;grid-template-columns:repeat(4,1fr);margin-bottom:18px}
+.stat-card{background:var(--card);border-radius:var(--r);padding:16px;box-shadow:var(--sh)}
+.stat-card .lbl{font-size:11px;color:var(--sub);font-weight:500;margin-bottom:6px}
+.stat-card .val{font-size:24px;font-weight:700}
+.stat-card .sub{font-size:11px;color:var(--sub);margin-top:3px}
+.stat-card.warn .val{color:var(--warn)}.stat-card.err .val{color:var(--err)}.stat-card.ok .val{color:var(--ok)}
+
+/* 필터 */
+.filter-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.filter-bar input,.filter-bar select{padding:7px 11px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:12px;outline:none;background:#fff}
+.filter-bar input:focus,.filter-bar select:focus{border-color:var(--accent)}
+.filter-bar input[type=text]{flex:1;min-width:160px}
+
+/* 강좌 카드 */
+.course-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);margin-bottom:10px;box-shadow:var(--sh);overflow:hidden}
+.cc-header{padding:14px 16px;cursor:pointer;display:flex;align-items:flex-start;gap:10px;transition:.15s}
+.cc-header:hover{background:#f9fafb}
+.cc-header h3{font-size:13px;font-weight:700;flex:1;margin-bottom:3px}
+.cc-meta{font-size:11px;color:var(--sub);display:flex;gap:10px;flex-wrap:wrap}
+.cc-meta span{display:flex;align-items:center;gap:3px}
+.cc-budget{font-size:12px;font-weight:700;text-align:right;flex-shrink:0}
+.cc-budget.over{color:var(--err)}
+.cc-detail{border-top:1px solid var(--border);padding:16px;display:none;background:#fafafa}
+.cc-detail.open{display:block}
+.chevron{font-size:16px;color:var(--sub);transition:.2s;flex-shrink:0;margin-top:1px}
+.course-card.exp .chevron{transform:rotate(180deg)}
+
+/* 배송지 섹션 */
+.delivery-info{background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px;margin-bottom:12px;font-size:12px}
+.delivery-info .di-row{display:flex;gap:8px;margin-bottom:3px}
+.delivery-info .di-l{color:var(--sub);min-width:70px}
+.delivery-missing{background:var(--errb);border:1px solid #fca5a5;border-radius:8px;padding:10px 12px;font-size:12px;color:var(--err);margin-bottom:12px}
+
+/* 준비물 테이블 */
+.st{width:100%;border-collapse:collapse;font-size:12px}
+.st th{text-align:left;padding:6px 8px;border-bottom:2px solid var(--border);color:var(--sub);font-size:11px;font-weight:500}
+.st td{padding:8px;border-bottom:1px solid var(--border);vertical-align:middle}
+.st tr:last-child td{border-bottom:none}
+.st tr:hover td{background:#f9fafb}
+.link-btn{color:var(--accent);font-size:11px;text-decoration:none;background:var(--al);padding:2px 7px;border-radius:5px;display:inline-block}
+.est-btn{color:#7c3aed;font-size:11px;text-decoration:none;background:#f5f3ff;padding:2px 7px;border-radius:5px;display:inline-block}
+.st-sel{padding:4px 7px;border:1.5px solid var(--border);border-radius:6px;font-family:inherit;font-size:11px;cursor:pointer;outline:none}
+.st-sel.changed{border-color:#f59e0b;background:#fffbeb;font-weight:700}
+.review-save-bar{display:flex;align-items:center;justify-content:space-between;margin-top:10px;padding:9px 12px;background:#fffbeb;border:1.5px solid #fde68a;border-radius:8px}
+.review-save-bar .hint{font-size:12px;color:#92400e}
+.review-save-bar.hidden{display:none!important}
+
+/* 뱃지 */
+.badge{display:inline-block;padding:2px 7px;border-radius:99px;font-size:10px;font-weight:700}
+.b-gray{background:#f3f4f6;color:#4b5563}
+.b-ok{background:var(--okb);color:var(--ok)}
+.b-err{background:var(--errb);color:var(--err)}
+.b-warn{background:var(--warnb);color:var(--warn)}
+.b-open{background:var(--okb);color:var(--ok)}
+.b-pending{background:#f3f4f6;color:#4b5563}
+.b-closed{background:#f3f4f6;color:#9ca3af}
+
+/* 수강인원 에디터 */
+.stud-edit{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px;padding:10px;background:#f9fafb;border-radius:8px;border:1px solid var(--border)}
+.stud-edit label{font-size:11px;font-weight:500;color:var(--sub)}
+.stud-edit input{width:70px;padding:5px 9px;border:1.5px solid var(--border);border-radius:6px;font-family:inherit;font-size:13px;outline:none}
+.stud-edit input:focus{border-color:var(--accent)}
+.stud-edit select{padding:5px 9px;border:1.5px solid var(--border);border-radius:6px;font-family:inherit;font-size:12px;outline:none}
+
+/* 피드백 */
+.fb-form{display:flex;gap:8px;margin-top:10px}
+.fb-form textarea{flex:1;padding:8px 11px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:12px;resize:none;height:60px;outline:none}
+.fb-form textarea:focus{border-color:var(--accent)}
+
+/* 버튼 */
+.btn{padding:7px 14px;border:none;border-radius:8px;font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;transition:.15s}
+.btn-accent{background:var(--accent);color:#fff}.btn-accent:hover{background:#3d50c0}
+.btn-sm{padding:4px 9px;font-size:11px}
+.btn-err{background:#dc2626;color:#fff}.btn-err:hover{background:#b91c1c}
+.btn-ghost{background:transparent;color:var(--accent);border:1.5px solid var(--accent)}.btn-ghost:hover{background:var(--al)}
+.btn-ok{background:#16a34a;color:#fff}.btn-ok:hover{background:#15803d}
+
+/* 내보내기 / 용역업체 양식 */
+.export-section h3{font-size:13px;font-weight:700;margin-bottom:6px}
+.export-section p{font-size:12px;color:var(--sub);margin-bottom:12px}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+
+/* 용역업체 양식 미리보기 (인쇄용) */
+.vendor-sheet{font-family:'Noto Sans KR',sans-serif;max-width:700px;margin:0 auto;padding:20px;background:#fff}
+.vs-title{text-align:center;font-size:16px;font-weight:700;margin-bottom:12px}
+.vs-info-table{width:100%;border-collapse:collapse;margin-bottom:14px;font-size:12px}
+.vs-info-table td{padding:5px 10px;border:1px solid #999}
+.vs-info-table .lbl-cell{background:#f0f0f0;font-weight:500;width:80px}
+.vs-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:10px}
+.vs-table th{background:#e8eaf6;padding:6px 8px;border:1px solid #999;text-align:center;font-weight:700}
+.vs-table td{padding:5px 8px;border:1px solid #999;text-align:right}
+.vs-table td.left{text-align:left}
+.vs-table td.center{text-align:center}
+.vs-total{text-align:right;font-size:13px;font-weight:700;margin-top:6px}
+.vs-est{margin-top:12px;font-size:12px;font-weight:700}
+.vs-est-img{max-width:100%;margin-top:8px;border:1px solid #ddd}
+
+/* 알림 */
+.alert{padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:10px}
+.alert-ok{background:var(--okb);color:var(--ok)}
+.alert-err{background:var(--errb);color:var(--err)}
+.alert-info{background:var(--al);color:var(--accent)}
+
+.loader{display:none;text-align:center;padding:50px;color:var(--sub);font-size:13px}
+.spin{display:inline-block;width:26px;height:26px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* 전체화면 로딩 오버레이 */
+.overlay{position:fixed;inset:0;background:rgba(255,255,255,.88);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;backdrop-filter:blur(2px)}
+.overlay.hidden{display:none!important}
+.overlay .spin-lg{width:40px;height:40px;border:4px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+.overlay .ov-title{font-size:15px;font-weight:700;color:var(--text)}
+.overlay .ov-sub{font-size:13px;color:var(--sub);text-align:center;line-height:1.6;white-space:pre-line}
+.overlay .ov-note{font-size:11px;color:#9ca3af;margin-top:2px}
+
+.hidden{display:none!important}
+.tr{text-align:right}
+.tsm{font-size:11px;color:var(--sub)}
+.divider{border:none;border-top:1px solid var(--border);margin:12px 0}
+@media print{
+  .sidebar, .filter-bar, .btn, .nav-item, .ph,
+  .export-section, #courseSheetSec > h3,
+  #courseSheetSec > p, #courseSheetSec > .btn-row,
+  .card > .sec-title, .card > p { display:none!important }
+  .main { padding:0 }
+  #pageExport .card { box-shadow:none; border:none; padding:0 }
+  #sheetPreview { display:block!important }
+}
+</style>
+</head>
+<body>
+
+<!-- 전체화면 로딩 오버레이 -->
+<div class="overlay hidden" id="overlay">
+  <div class="spin-lg"></div>
+  <div class="ov-title" id="ovTitle">처리 중...</div>
+  <div class="ov-sub" id="ovSub">Google 서버와 통신 중입니다.
+잠시만 기다려주세요.</div>
+  <div class="ov-note">※ Google Sheets 연동으로 인해 10~20초 소요될 수 있습니다</div>
+</div>
+
+<!-- ── 로그인 ────────────────────────────────────── -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <h1>꿈키움 준비물 관리</h1>
+    <p>2026학년도 1학기 · 담당자용</p>
+    <div class="tab-row">
+      <div class="tab on" id="tab-univ" onclick="switchTab('univ')">대학 담당자</div>
+      <div class="tab" id="tab-admin" onclick="switchTab('admin')">교육청 관리자</div>
+      <div class="tab" id="tab-vendor" onclick="switchTab('vendor')">용역업체</div>
+    </div>
+    <div id="field-univ">
+      <div class="fg"><label>대학코드</label><input type="text" id="univCode" placeholder="예: KJ01" style="text-transform:uppercase"></div>
+    </div>
+    <div id="field-admin" class="hidden">
+      <div class="fg"><label>관리자 키</label><input type="password" id="adminKey" placeholder="관리자 키 입력"></div>
+    </div>
+    <div id="field-vendor" class="hidden">
+      <div class="fg"><label>업체 코드</label><input type="password" id="vendorKey" placeholder="업체 코드 입력"></div>
+    </div>
+    <button class="btn-login" onclick="login()">로그인</button>
+    <div class="err-msg" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- ── 앱 ─────────────────────────────────────────── -->
+<div class="app" id="app">
+  <div class="sidebar">
+    <div class="logo">
+      <h1>꿈키움 준비물</h1><p>2026학년도 1학기</p>
+      <span class="role-badge" id="roleBadge">대학 담당자</span>
+    </div>
+    <nav>
+      <div class="nav-item on" onclick="goPage('dash')" id="nav-dash"><span class="icon">📊</span>대시보드</div>
+      <div class="nav-item" onclick="goPage('courses')" id="nav-courses"><span class="icon">📚</span>강좌 현황</div>
+      <div class="nav-item hidden" onclick="goPage('export')" id="nav-export"><span class="icon">📥</span>내보내기</div>
+    </nav>
+    <div class="uinfo"><strong id="uName">-</strong><span id="uRole">-</span></div>
+  </div>
+
+  <div class="main">
+    <div class="loader" id="mainLoader" style="display:flex;align-items:center;gap:12px;padding:60px">
+      <div class="spin"></div> 데이터 불러오는 중...
+    </div>
+
+    <!-- 대시보드 -->
+    <div id="pageDash" class="hidden">
+      <div class="ph"><h2>대시보드</h2><p id="dashDesc"></p></div>
+      <div class="stat-row" id="statRow"></div>
+      <div class="card"><div class="sec-title">주의 필요 강좌</div><div id="alertCourses"></div></div>
+    </div>
+
+    <!-- 강좌 현황 -->
+    <div id="pageCourses" class="hidden">
+      <div class="ph"><h2>강좌별 현황</h2><p>강좌를 클릭하면 상세 내용을 확인하고 관리할 수 있습니다</p></div>
+      <div class="filter-bar">
+        <input type="text" id="fText" placeholder="강좌명, 강사명, 코드 검색..." oninput="renderList()">
+        <select id="fUniv" onchange="renderList()"><option value="">전체 대학</option></select>
+        <select id="fStatus" onchange="renderList()">
+          <option value="">전체 상태</option>
+          <option value="개설예정">개설예정</option>
+          <option value="개설확정">개설확정</option>
+          <option value="폐강">폐강</option>
+        </select>
+        <select id="fSupply" onchange="renderList()">
+          <option value="">신청 여부</option>
+          <option value="submitted">신청 있음</option>
+          <option value="empty">미신청</option>
+          <option value="nosupply">해당없음</option>
+          <option value="over">예산 초과</option>
+          <option value="nodel">배송지 미입력</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" onclick="refresh()">🔄 새로고침</button>
+      </div>
+      <div id="courseList"></div>
+    </div>
+
+    <!-- 내보내기 -->
+    <div id="pageExport" class="hidden">
+      <div class="ph"><h2>데이터 내보내기</h2><p>용역업체 전달용 자료를 준비합니다</p></div>
+
+      <div class="card export-section">
+        <h3>전체 준비물 목록 (CSV)</h3>
+        <p>모든 강좌의 준비물·배송지 정보를 담은 통합 파일입니다.</p>
+        <div class="btn-row">
+          <button class="btn btn-ok" onclick="exportCsv('all')">📥 전체 내보내기</button>
+          <button class="btn btn-accent" onclick="exportCsv('confirmed')">📥 개설확정만</button>
+        </div>
+      </div>
+
+      <div class="card export-section" id="courseSheetSec">
+        <h3>강좌별 신청서 (용역업체 양식)</h3>
+        <p>강좌를 선택하면 기존 제출 양식과 동일한 형태의 신청서를 미리보기하고 인쇄할 수 있습니다.</p>
+        <div class="btn-row" style="margin-bottom:14px">
+          <select id="exportCourseSelect" style="padding:7px 11px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:12px;outline:none;min-width:200px">
+            <option value="">강좌 선택...</option>
+          </select>
+          <button class="btn btn-accent" onclick="previewSheet()">미리보기</button>
+          <button class="btn btn-ok" onclick="printSheet()">🖨 인쇄</button>
+          <button class="btn btn-ghost" onclick="exportAllSheets()">전체 강좌 일괄 CSV</button>
+        </div>
+        <div id="sheetPreview"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxjbaygQzxTA4fYzT1lw5weYCBGe-QJsPwb2mLdCS_puf4wm7LpLDL4JtcB5Lj1fWX4fQ/exec';
+
+let role = 'univ', loginCode = '', allCourses = [];
+let YEAR = '2026', TERM = '여름방학';
+
+async function loadSettings() {
+  try {
+    const res = await api({ action: 'getSettings' });
+    if (res.ok) { YEAR = res.year; TERM = res.term; }
+  } catch(e) {}
+  const label = `${YEAR}학년도 ${TERM}`;
+  // 로그인 화면 부제목
+  const loginSub = document.querySelector('.login-box p');
+  if (loginSub) loginSub.textContent = label + ' · 담당자용';
+  // 사이드바
+  const sidebarSub = document.querySelector('.sidebar .logo p');
+  if (sidebarSub) sidebarSub.textContent = label;
+}
+
+window.addEventListener('DOMContentLoaded', loadSettings);
+
+// ── 로그인 ──────────────────────────────────────────
+function switchTab(t) {
+  role = t;
+  ['univ','admin','vendor'].forEach(r => {
+    document.getElementById('tab-' + r).className = 'tab' + (r === t ? ' on' : '');
+    document.getElementById('field-' + r).classList.toggle('hidden', r !== t);
+  });
+}
+
+async function login() {
+  document.getElementById('loginErr').textContent = '';
+  const roleMsg = { univ:'소속 강좌를 불러옵니다.', admin:'전체 강좌 현황을 불러옵니다.', vendor:'구매 대상 강좌를 불러옵니다.' };
+  showOverlay('로그인 중...', roleMsg[role] || '데이터를 불러오는 중입니다.');
+  let res;
+  try {
+    if (role === 'univ') {
+      loginCode = document.getElementById('univCode').value.trim().toUpperCase();
+      res = await api({ action: 'getUnivCoursesLight', univCode: loginCode });
+    } else if (role === 'admin') {
+      loginCode = document.getElementById('adminKey').value.trim();
+      res = await api({ action: 'getAllCoursesLight', adminKey: loginCode });
+    } else {
+      loginCode = document.getElementById('vendorKey').value.trim();
+      res = await api({ action: 'getVendorCoursesLight', vendorKey: loginCode });
+    }
+  } catch(e) {
+    hideOverlay();
+    document.getElementById('loginErr').textContent = '서버 연결 실패';
+    return;
+  }
+
+  hideOverlay();
+  if (!res.ok) { document.getElementById('loginErr').textContent = res.msg; return; }
+
+  allCourses = res.courses;
+  const roleLabels = { univ:'대학 담당자', admin:'교육청 관리자', vendor:'용역업체' };
+  document.getElementById('roleBadge').textContent = roleLabels[role];
+  document.getElementById('uName').textContent = res.managerName || (role === 'admin' ? '관리자' : '업체담당자');
+  document.getElementById('uRole').textContent = res.univName || (role === 'admin' ? '충남교육청 중등교육과' : '구매·배송 용역');
+
+  if (role === 'admin' || role === 'vendor') document.getElementById('nav-export').classList.remove('hidden');
+
+  if (role === 'admin') {
+    const univs = [...new Set(allCourses.map(c => c.univName))].sort();
+    const sel = document.getElementById('fUniv');
+    univs.forEach(u => { const o = document.createElement('option'); o.value = u; o.textContent = u; sel.appendChild(o); });
+  }
+
+  const expSel = document.getElementById('exportCourseSelect');
+  allCourses
+    .filter(c => !c.noSupply && c.status !== '폐강')
+    .forEach(c => {
+      const o = document.createElement('option');
+      o.value = c.courseCode;
+      const tag = c.supplyCount > 0 ? '' : ' [미신청]';
+      o.textContent = `[${c.courseCode}] ${c.courseName} (${c.univName})${tag}`;
+      expSel.appendChild(o);
+    });
+
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').classList.add('on');
+  document.getElementById('mainLoader').style.display = 'none';
+  goPage('dash');
+}
+
+// ── 페이지 전환 ─────────────────────────────────────
+function goPage(page) {
+  ['dash','courses','export'].forEach(p => {
+    document.getElementById('page' + cap(p)).classList.add('hidden');
+    document.getElementById('nav-' + p).classList.remove('on');
+  });
+  document.getElementById('page' + cap(page)).classList.remove('hidden');
+  document.getElementById('nav-' + page).classList.add('on');
+  if (page === 'dash') renderDash();
+  if (page === 'courses') renderList();
+}
+function cap(s) { return s[0].toUpperCase() + s.slice(1); }
+
+// ── 대시보드 ────────────────────────────────────────
+function renderDash() {
+  const viewCourses = role === 'vendor' ? allCourses.filter(c => !c.noSupply) : allCourses;
+  const total     = viewCourses.length;
+  const confirmed = viewCourses.filter(c => c.status === '개설확정').length;
+  const closed    = viewCourses.filter(c => c.status === '폐강').length;
+  const noSupply  = allCourses.filter(c => c.noSupply).length;
+  const empty     = viewCourses.filter(c => !c.noSupply && c.status !== '폐강' && c.supplyCount === 0).length;
+  const over      = viewCourses.filter(c => Number(c.budget) > 0 && c.totalCost > Number(c.budget)).length;
+  const noDel     = viewCourses.filter(c => !c.noSupply && c.status !== '폐강' && !c.hasDelivery).length;
+  const totalAmt  = viewCourses.reduce((s, c) => s + (c.totalCost || 0), 0);
+
+  document.getElementById('statRow').innerHTML = `
+    <div class="stat-card"><div class="lbl">전체 강좌</div><div class="val">${total}</div><div class="sub">확정 ${confirmed} · 폐강 ${closed}</div></div>
+    <div class="stat-card ${empty > 0 ? 'warn' : ''}"><div class="lbl">미신청</div><div class="val">${empty}</div><div class="sub">해당없음 ${noSupply}개</div></div>
+    <div class="stat-card ${over > 0 ? 'err' : 'ok'}"><div class="lbl">예산 초과</div><div class="val">${over}</div><div class="sub">배송지 미입력 ${noDel}개</div></div>
+    <div class="stat-card"><div class="lbl">총 신청 금액</div><div class="val" style="font-size:16px">${fmt(totalAmt)}원</div><div class="sub"> </div></div>
+  `;
+
+  const alerts = [];
+  viewCourses.forEach(c => {
+    if (!c.noSupply && c.status !== '폐강' && c.supplyCount === 0)
+      alerts.push({ c, type:'미신청', msg:'준비물 신청 없음' });
+    if (Number(c.budget) > 0 && c.totalCost > Number(c.budget))
+      alerts.push({ c, type:'예산초과', msg:`${fmt(c.totalCost - Number(c.budget))}원 초과` });
+    if (!c.noSupply && c.status !== '폐강' && !c.hasDelivery)
+      alerts.push({ c, type:'배송지미입력', msg:'배송지 정보 없음' });
+  });
+
+  const el = document.getElementById('alertCourses');
+  el.innerHTML = alerts.length === 0
+    ? '<p class="tsm" style="text-align:center;padding:18px;color:#9ca3af">주의 사항이 없습니다 ✓</p>'
+    : alerts.map(a => `
+        <div style="display:flex;align-items:center;gap:10px;padding:9px;border-bottom:1px solid var(--border);cursor:pointer" onclick="goPage('courses')">
+          <span class="badge ${a.type==='미신청'?'b-warn':a.type==='예산초과'?'b-err':'b-gray'}">${a.type}</span>
+          <span style="flex:1;font-size:12px"><b>${esc(a.c.courseName)}</b> · ${esc(a.c.profName||'')}</span>
+          <span class="tsm">${a.msg}</span>
+        </div>`).join('');
+}
+
+// ── 강좌 목록 ───────────────────────────────────────
+function renderList() {
+  const q = document.getElementById('fText').value.toLowerCase();
+  const univ = document.getElementById('fUniv').value;
+  const status = document.getElementById('fStatus').value;
+  const supply = document.getElementById('fSupply').value;
+
+  const filtered = allCourses.filter(c => {
+    if (role === 'vendor' && c.noSupply) return false;
+    if (q && !([c.courseName, c.profName, c.courseCode].join(' ').toLowerCase().includes(q))) return false;
+    if (univ && c.univName !== univ) return false;
+    if (status && c.status !== status) return false;
+    if (supply === 'submitted' && c.supplyCount === 0) return false;
+    if (supply === 'empty' && (c.noSupply || c.supplyCount > 0)) return false;
+    if (supply === 'nosupply' && !c.noSupply) return false;
+    if (supply === 'over' && !(Number(c.budget) > 0 && c.totalCost > Number(c.budget))) return false;
+    if (supply === 'nodel' && (c.hasDelivery || c.noSupply || c.status === '폐강')) return false;
+    return true;
+  });
+
+  const list = document.getElementById('courseList');
+  if (!filtered.length) { list.innerHTML = '<p class="tsm" style="text-align:center;padding:28px;color:#9ca3af">조건에 맞는 강좌가 없습니다.</p>'; return; }
+  list.innerHTML = filtered.map(c => buildCard(c)).join('');
+}
+
+function buildCard(c) {
+  const budget = Number(c.budget) || 0;
+  const over   = budget > 0 && c.totalCost > budget;
+  const noDel  = !c.noSupply && c.status !== '폐강' && !c.hasDelivery;
+  const statusCls = { '개설예정':'b-pending', '개설확정':'b-open', '폐강':'b-closed' };
+
+  // 배송지 블록
+  const deliveryBlock = c.noSupply ? '' : (c.delivery
+    ? `<div class="delivery-info">
+        <div style="font-size:11px;font-weight:700;color:var(--ok);margin-bottom:5px">📦 배송지 정보</div>
+        <div class="di-row"><span class="di-l">주소</span><span>${esc(c.delivery.address)} ${esc(c.delivery.building)}</span></div>
+        <div class="di-row"><span class="di-l">수령인</span><span>${esc(c.delivery.recipient)} · ${esc(c.delivery.phone)}</span></div>
+        ${c.delivery.memo ? `<div class="di-row"><span class="di-l">메모</span><span>${esc(c.delivery.memo)}</span></div>` : ''}
+      </div>`
+    : `<div class="delivery-missing">⚠ 배송지 정보가 입력되지 않았습니다. 강사에게 입력을 요청해주세요.</div>`);
+
+  // 준비물 테이블
+  const supplyBlock = c.noSupply
+    ? `<div class="alert alert-info" style="margin:0">이 강좌는 준비물이 없습니다 (해당없음)</div>`
+    : (c.supplies && c.supplies.length
+        ? `<div style="overflow-x:auto">
+            <table class="st">
+              <thead><tr>
+                <th>품명/비고</th><th>수량</th><th>단가</th><th>소계</th><th>배송비</th><th>합계</th><th>구매방식</th><th>링크/견적서</th>
+                ${role === 'admin' ? '<th>검토상태</th><th></th>' : '<th>상태</th>'}
+              </tr></thead>
+              <tbody>
+                ${c.supplies.map(s => `
+                  <tr>
+                    <td><b>${esc(s.itemName)}</b>${s.note?`<br><span class="tsm">${esc(s.note)}</span>`:''}</td>
+                    <td class="tr">${s.qty}</td>
+                    <td class="tr">${fmt(s.unitPrice)}</td>
+                    <td class="tr">${fmt(s.subTotal)}</td>
+                    <td class="tr">${fmt(s.shipping)}</td>
+                    <td class="tr"><b>${fmt((Number(s.subTotal)||0)+(Number(s.shipping)||0))}</b></td>
+                    <td><span class="badge ${s.purchaseType==='견적서'?'b-warn':'b-gray'}">${esc(s.purchaseType||'쇼핑몰')}</span></td>
+                    <td>${s.purchaseType==='견적서'
+                      ? (s.estimateUrl?`<a class="est-btn" href="${esc(s.estimateUrl)}" target="_blank">📄 견적서</a>`:'<span class="tsm">미첨부</span>')
+                      : (s.link?`<a class="link-btn" href="${esc(s.link)}" target="_blank">🔗 링크</a>`:'<span class="tsm">없음</span>')}</td>
+                    ${role==='admin'
+                      ? `<td>
+                           <select class="st-sel" id="sel_${s.rowId}"
+                             data-original="${s.status}"
+                             onchange="markChanged(this,'${c.courseCode}')">
+                             ${['검토전','승인','반려','수정요청'].map(v=>`<option ${v===s.status?'selected':''}>${v}</option>`).join('')}
+                           </select>
+                         </td>
+                         <td><button class="btn btn-err btn-sm" onclick="admDel('${s.rowId}','${c.courseCode}')">삭제</button></td>`
+                      : `<td><span class="badge ${s.status==='승인'?'b-ok':s.status==='검토전'?'b-pending':'b-err'}">${esc(s.status)}</span></td>`}
+                  </tr>`).join('')}
+              </tbody>
+            </table></div>
+            <div class="tr" style="margin-top:8px;font-size:13px;font-weight:700">
+              합계: ${fmt(c.totalCost)}원
+              ${budget>0?` / 예산: ${fmt(budget)}원 → <span style="color:${over?'var(--err)':'var(--ok)'}">잔여 ${fmt(budget-c.totalCost)}원</span>`:''}
+            </div>
+            ${role==='admin' ? `
+            <div class="review-save-bar hidden" id="rsbar_${c.courseCode}">
+              <span class="hint">⚠ 저장되지 않은 변경사항이 있습니다</span>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-ghost btn-sm" onclick="cancelReview('${c.courseCode}')">되돌리기</button>
+                <button class="btn btn-ok btn-sm" onclick="saveReview('${c.courseCode}')">검토 결과 저장</button>
+              </div>
+            </div>` : ''}`
+        : `<p class="tsm" style="text-align:center;padding:14px;color:#9ca3af">신청된 준비물이 없습니다.</p>`);
+
+  // 관리자 전용 컨트롤 (수강인원·피드백)
+  const adminCtrl = role === 'admin' ? `
+    <hr class="divider">
+    <div class="stud-edit">
+      <label>수강인원</label>
+      <input type="number" id="st_${c.courseCode}" value="${c.students||0}" min="0">
+      <label style="margin-left:4px">상태</label>
+      <select id="ss_${c.courseCode}">
+        <option ${c.status==='개설예정'?'selected':''}>개설예정</option>
+        <option ${c.status==='개설확정'?'selected':''}>개설확정</option>
+        <option ${c.status==='폐강'?'selected':''}>폐강</option>
+      </select>
+      <button class="btn btn-accent btn-sm" onclick="updCourse('${c.courseCode}')">저장</button>
+      <span class="tsm">수강인원×30,000원 자동 계산</span>
+    </div>
+    <div class="fb-form" style="margin-top:8px">
+      <textarea id="fb_${c.courseCode}" placeholder="강사 및 대학 담당자에게 피드백을 보냅니다..."></textarea>
+      <button class="btn btn-accent btn-sm" onclick="sendFb('${c.courseCode}')">발송</button>
+    </div>` : '';
+
+  return `
+    <div class="course-card" id="cc_${c.courseCode}">
+      <div class="cc-header" onclick="toggleCard('${c.courseCode}')">
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">
+            <span class="badge ${statusCls[c.status]||'b-pending'}">${c.status}</span>
+            <h3>${esc(c.courseName)}</h3>
+            ${over?'<span class="badge b-err">예산초과</span>':''}
+            ${c.noSupply?'<span class="badge b-ok">해당없음</span>':''}
+            ${(!c.noSupply && c.status!=='폐강' && c.supplyCount===0)?'<span class="badge b-warn">미신청</span>':''}
+            ${noDel?'<span class="badge b-gray">배송지없음</span>':''}
+          </div>
+          <div class="cc-meta">
+            <span>📌 ${esc(c.courseCode)}</span>
+            ${c.univName?`<span>🏫 ${esc(c.univName)}</span>`:''}
+            <span>👤 ${esc(c.profName||'')}${c.profPhone ? ` · ☎ ${esc(c.profPhone)}` : ''}</span>
+            <span>👥 ${c.students||'미확정'}명</span>
+          </div>
+        </div>
+        <div class="cc-budget ${over?'over':''}">
+          <div>${fmt(c.totalCost)}원</div>
+          <div class="tsm">${budget>0?`예산 ${fmt(budget)}원`:'예산 미확정'}</div>
+        </div>
+        <span class="chevron">▾</span>
+      </div>
+      <div class="cc-detail" id="det_${c.courseCode}">
+        <!-- 카드 열 때 lazy load -->
+        <div id="det_inner_${c.courseCode}">
+          <div style="text-align:center;padding:20px;color:var(--sub);font-size:13px">
+            <div class="spin" style="display:inline-block;margin-bottom:6px"></div><br>상세 정보 불러오는 중...
+          </div>
+        </div>
+        ${adminCtrl}
+      </div>
+    </div>`;
+}
+
+// ── 카드 열기 + 상세 lazy load ──────────────────────
+function toggleCard(code) {
+  const card = document.getElementById('cc_' + code);
+  const det  = document.getElementById('det_' + code);
+  const isOpen = card.classList.contains('exp');
+
+  if (isOpen) {
+    const bar = document.getElementById('rsbar_' + code);
+    if (bar && !bar.classList.contains('hidden')) {
+      if (!confirm('저장되지 않은 검토 변경사항이 있습니다. 닫으면 변경사항이 사라집니다. 계속하시겠습니까?')) return;
+      cancelReview(code);
+    }
+  }
+
+  document.querySelectorAll('.course-card.exp').forEach(el => {
+    if (el.id !== 'cc_' + code) {
+      el.classList.remove('exp');
+      el.querySelector('.cc-detail').classList.remove('open');
+    }
+  });
+
+  card.classList.toggle('exp', !isOpen);
+  det.classList.toggle('open', !isOpen);
+
+  // 열 때만 상세 로드 (이미 로드된 경우 스킵)
+  if (!isOpen) loadCardDetail(code);
+}
+
+async function loadCardDetail(code) {
+  const inner = document.getElementById('det_inner_' + code);
+  if (!inner || inner.dataset.loaded === '1') return;
+
+  try {
+    const key = role === 'admin' ? { adminKey: loginCode }
+              : role === 'vendor' ? { vendorKey: loginCode }
+              : { univCode: loginCode };
+    const res = await api({ action: 'getCourseDetail', courseCode: code, ...key });
+    if (!res.ok) { inner.innerHTML = `<div class="alert alert-err">${res.msg}</div>`; return; }
+
+    // allCourses 캐시 업데이트
+    const c = allCourses.find(x => x.courseCode.toUpperCase() === code.toUpperCase());
+    if (c) {
+      c.supplies   = res.supplies || [];
+      c.delivery   = res.delivery || null;
+      c.totalCost  = res.totalCost || 0;
+      c.hasDelivery = !!res.delivery;
+    }
+
+    inner.dataset.loaded = '1';
+    inner.innerHTML = buildDetailBlock(c || {}, res);
+  } catch(e) {
+    inner.innerHTML = '<div class="alert alert-err">상세 정보를 불러오지 못했습니다.</div>';
+  }
+}
+
+function buildDetailBlock(c, res) {
+  const budget   = Number(c.budget) || 0;
+  const over     = budget > 0 && res.totalCost > budget;
+  const delivery = res.delivery;
+  const supplies = res.supplies || [];
+
+  const deliveryBlock = c.noSupply ? '' : (delivery
+    ? `<div class="delivery-info">
+        <div style="font-size:11px;font-weight:700;color:var(--ok);margin-bottom:5px">📦 배송지 정보</div>
+        <div class="di-row"><span class="di-l">주소</span><span>${esc(delivery.address)} ${esc(delivery.building)}</span></div>
+        <div class="di-row"><span class="di-l">수령인</span><span>${esc(delivery.recipient)} · ${esc(delivery.phone)}</span></div>
+        ${delivery.memo ? `<div class="di-row"><span class="di-l">메모</span><span>${esc(delivery.memo)}</span></div>` : ''}
+      </div>`
+    : `<div class="delivery-missing">⚠ 배송지 정보가 입력되지 않았습니다. 강사에게 입력을 요청해주세요.</div>`);
+
+  const supplyBlock = c.noSupply
+    ? `<div class="alert alert-info" style="margin:0">이 강좌는 준비물이 없습니다 (해당없음)</div>`
+    : (supplies.length
+        ? `<div style="overflow-x:auto">
+            <table class="st">
+              <thead><tr>
+                <th>품명/비고</th><th>수량</th><th>단가</th><th>소계</th><th>배송비</th><th>합계</th><th>구매방식</th><th>링크/견적서</th>
+                ${role === 'admin' ? '<th>검토상태</th><th></th>' : '<th>상태</th>'}
+              </tr></thead>
+              <tbody>
+                ${supplies.map(s => `
+                  <tr>
+                    <td><b>${esc(s.itemName)}</b>${s.note?`<br><span class="tsm">${esc(s.note)}</span>`:''}</td>
+                    <td class="tr">${s.qty}</td><td class="tr">${fmt(s.unitPrice)}</td>
+                    <td class="tr">${fmt(s.subTotal)}</td><td class="tr">${fmt(s.shipping)}</td>
+                    <td class="tr"><b>${fmt((Number(s.subTotal)||0)+(Number(s.shipping)||0))}</b></td>
+                    <td><span class="badge ${s.purchaseType==='견적서'?'b-warn':'b-gray'}">${esc(s.purchaseType||'쇼핑몰')}</span></td>
+                    <td>${s.purchaseType==='견적서'
+                      ? (s.estimateUrl?`<a class="est-btn" href="${esc(s.estimateUrl)}" target="_blank">📄 견적서</a>`:'<span class="tsm">미첨부</span>')
+                      : (s.link?`<a class="link-btn" href="${esc(s.link)}" target="_blank">🔗 링크</a>`:'<span class="tsm">없음</span>')}</td>
+                    ${role==='admin'
+                      ? `<td><select class="st-sel" id="sel_${s.rowId}" data-original="${s.status}"
+                             onchange="markChanged(this,'${c.courseCode}')">
+                             ${['검토전','승인','반려','수정요청'].map(v=>`<option ${v===s.status?'selected':''}>${v}</option>`).join('')}
+                           </select></td>
+                         <td><button class="btn btn-err btn-sm" onclick="admDel('${s.rowId}','${c.courseCode}')">삭제</button></td>`
+                      : `<td><span class="badge ${s.status==='승인'?'b-ok':s.status==='검토전'?'b-pending':'b-err'}">${esc(s.status)}</span></td>`}
+                  </tr>`).join('')}
+              </tbody>
+            </table></div>
+            <div class="tr" style="margin-top:8px;font-size:13px;font-weight:700">
+              합계: ${fmt(res.totalCost)}원
+              ${budget>0?` / 예산: ${fmt(budget)}원 → <span style="color:${over?'var(--err)':'var(--ok)'}">잔여 ${fmt(budget-res.totalCost)}원</span>`:''}
+            </div>
+            ${role==='admin' ? `
+            <div class="review-save-bar hidden" id="rsbar_${c.courseCode}">
+              <span class="hint">⚠ 저장되지 않은 변경사항이 있습니다</span>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-ghost btn-sm" onclick="cancelReview('${c.courseCode}')">되돌리기</button>
+                <button class="btn btn-ok btn-sm" onclick="saveReview('${c.courseCode}')">검토 결과 저장</button>
+              </div>
+            </div>` : ''}`
+        : `<p class="tsm" style="text-align:center;padding:14px;color:#9ca3af">신청된 준비물이 없습니다.</p>`);
+
+  return deliveryBlock + `<div style="font-size:12px;font-weight:700;margin-bottom:8px">준비물 (${supplies.length}개)</div>` + supplyBlock;
+}
+
+// ── 관리자 액션 ─────────────────────────────────────
+
+// 드롭다운 변경 시 — 즉시 저장 않고 변경 표시만
+function markChanged(sel, courseCode) {
+  const original = sel.dataset.original;
+  const changed = sel.value !== original;
+  sel.classList.toggle('changed', changed);
+  // 이 강좌 카드 안에 변경된 드롭다운이 하나라도 있으면 저장 바 표시
+  const bar = document.getElementById('rsbar_' + courseCode);
+  if (!bar) return;
+  const anyChanged = document.querySelectorAll(`#det_${courseCode} .st-sel.changed`).length > 0;
+  bar.classList.toggle('hidden', !anyChanged);
+}
+
+// 되돌리기 — 모든 드롭다운을 original 값으로 복원
+function cancelReview(courseCode) {
+  document.querySelectorAll(`#det_${courseCode} .st-sel`).forEach(sel => {
+    sel.value = sel.dataset.original;
+    sel.classList.remove('changed');
+  });
+  document.getElementById('rsbar_' + courseCode)?.classList.add('hidden');
+}
+
+// 검토 결과 일괄 저장
+async function saveReview(courseCode) {
+  const sels = document.querySelectorAll(`#det_${courseCode} .st-sel.changed`);
+  if (!sels.length) return;
+
+  showOverlay('검토 결과 저장 중...', `${sels.length}개 항목의 검토 상태를 저장합니다.`);
+  try {
+    for (const sel of sels) {
+      const rowId = sel.id.replace('sel_', '');
+      await api({ action: 'updateSupply', rowId, field: '검토상태', value: sel.value });
+      sel.dataset.original = sel.value;
+      sel.classList.remove('changed');
+    }
+    document.getElementById('rsbar_' + courseCode)?.classList.add('hidden');
+    // 로컬 데이터도 갱신
+    await refresh();
+    renderList();
+    renderDash();
+  } catch(e) {
+    alert('저장 중 오류가 발생했습니다. 다시 시도해주세요.');
+  } finally {
+    hideOverlay();
+  }
+}
+
+async function admDel(rowId, courseCode) {
+  if (!confirm('삭제하시겠습니까?')) return;
+  showOverlay('삭제 중...', '');
+  const res = await api({ action: 'deleteSupply', rowId });
+  if (res.ok) { await refresh(); renderList(); }
+  else alert(res.msg);
+  hideOverlay();
+}
+
+async function updCourse(code) {
+  const students = Number(document.getElementById('st_' + code).value) || 0;
+  const status = document.getElementById('ss_' + code).value;
+  showOverlay('강좌 정보 저장 중...', '수강인원과 상태를 업데이트합니다.');
+  const res = await api({ action: 'updateCourseStatus', courseCode: code, status, students, adminKey: loginCode });
+  if (res.ok) { await refresh(); hideOverlay(); renderList(); renderDash(); alert(`저장 완료. 가용예산: ${fmt(students * 30000)}원`); }
+  else { hideOverlay(); alert(res.msg); }
+}
+
+async function sendFb(code) {
+  const msg = document.getElementById('fb_' + code).value.trim();
+  if (!msg) { alert('피드백 내용을 입력해주세요.'); return; }
+  showOverlay('피드백 발송 중...', '강사 및 대학 담당자에게 이메일을 발송합니다.');
+  const res = await api({ action: 'sendFeedback', courseCode: code, message: msg, adminKey: loginCode });
+  hideOverlay();
+  if (res.ok) { document.getElementById('fb_' + code).value = ''; alert('피드백 발송 완료\n대학 담당자에게 이메일이 발송되었습니다.\n(이메일 본문에 강사 연락처가 포함됩니다)'); }
+  else alert(res.msg);
+}
+
+async function refresh() {
+  showOverlay('데이터 새로고침 중...', '최신 신청 현황을 불러옵니다.');
+  let res;
+  if (role === 'univ')        res = await api({ action: 'getUnivCoursesLight',   univCode:  loginCode });
+  else if (role === 'admin')  res = await api({ action: 'getAllCoursesLight',    adminKey:  loginCode });
+  else                        res = await api({ action: 'getVendorCoursesLight', vendorKey: loginCode });
+  if (res.ok) {
+    allCourses = res.courses;
+    // 열려 있던 카드의 loaded 플래그 초기화 → 다음 열 때 재로드
+    document.querySelectorAll('[id^="det_inner_"]').forEach(el => delete el.dataset.loaded);
+  }
+  hideOverlay();
+}
+
+// ── 내보내기 ────────────────────────────────────────
+async function exportCsv(filter) {
+  showOverlay('데이터 내보내기 준비 중...', '전체 준비물 목록을 가져옵니다.');
+  const key = role === 'admin' ? loginCode : '';
+  const vKey = role === 'vendor' ? loginCode : '';
+  const res = await api({ action: 'exportAll', adminKey: key, vendorKey: vKey });
+  hideOverlay();
+  if (!res.ok) { alert(res.msg); return; }
+
+  let { headers, rows } = res;
+  if (filter === 'confirmed') {
+    rows = rows.filter(r => {
+      const c = allCourses.find(x => String(x.courseCode).toUpperCase() === String(r[0]).toUpperCase());
+      return c && c.status === '개설확정';
+    });
+  }
+
+  const BOM = '\uFEFF';
+  const csv = BOM + [headers, ...rows].map(r =>
+    r.map(cell => `"${String(cell||'').replace(/"/g,'""')}"`).join(',')
+  ).join('\r\n');
+
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = `꿈키움_준비물_${filter==='confirmed'?'개설확정':'전체'}_${today()}.csv`;
+  a.click();
+}
+
+// Drive 공유 URL → 직접 임베드 가능한 URL로 변환
+function driveImgUrl(url) {
+  if (!url) return '';
+  // file/d/{ID}/view 형식
+  const m1 = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+  if (m1) return 'https://lh3.googleusercontent.com/d/' + m1[1];
+  // uc?id={ID} 형식 (구형)
+  const m2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (m2) return 'https://lh3.googleusercontent.com/d/' + m2[1];
+  return url;
+}
+
+// 강좌별 신청서 미리보기 (첨부 이미지와 동일한 양식)
+function previewSheet() {
+  const code = document.getElementById('exportCourseSelect').value;
+  if (!code) { alert('강좌를 선택해주세요.'); return; }
+  const c = allCourses.find(x => String(x.courseCode).toUpperCase() === code.toUpperCase());
+  if (!c) return;
+  const d = c.delivery || {};
+
+  let supplyRows = '';
+  let totalAmt = 0;
+  const hasEstimate = (c.supplies || []).some(s => s.purchaseType === '견적서');
+
+  if (c.noSupply) {
+    supplyRows = `<tr><td class="left" colspan="6">해당없음 (준비물 없음)</td></tr>`;
+  } else if (!c.supplies || !c.supplies.length) {
+    supplyRows = `<tr><td class="left" colspan="6">미신청</td></tr>`;
+  } else {
+    c.supplies.forEach((s, i) => {
+      const sub = Number(s.subTotal) || 0;
+      const ship = Number(s.shipping) || 0;
+      const total = sub + ship;
+      totalAmt += total;
+      const linkCell = s.purchaseType === '견적서'
+        ? (s.estimateUrl ? `<a href="${esc(s.estimateUrl)}" target="_blank">견적서 보기</a>` : '견적서 첨부')
+        : (s.link ? `<a href="${esc(s.link)}" target="_blank">링크</a>` : '-');
+      supplyRows += `
+        <tr>
+          <td class="center">${i + 1}</td>
+          <td class="left">${esc(s.itemName)}${s.note?`<br><small>${esc(s.note)}</small>`:''}</td>
+          <td class="left">${linkCell}</td>
+          <td>${s.qty}개 × ${fmt(s.unitPrice)}원 = ${fmt(sub)}원<br><small>배송비 ${fmt(ship)}원</small></td>
+          <td>${fmt(sub)}</td>
+          <td>${fmt(ship)}</td>
+          <td>${fmt(total)}</td>
+        </tr>`;
+    });
+  }
+
+  const estimateImgs = (c.supplies || []).filter(s => s.purchaseType === '견적서' && s.estimateUrl)
+    .map(s => {
+      const imgUrl = driveImgUrl(s.estimateUrl);
+      return `
+        <div style="margin-bottom:16px">
+          <div style="font-weight:700;margin-bottom:6px">${esc(s.itemName)}</div>
+          <img class="vs-est-img" src="${imgUrl}"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
+            style="max-width:100%;border:1px solid #ddd;border-radius:4px;display:block">
+          <div style="display:none;padding:10px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:4px;font-size:12px">
+            이미지를 불러올 수 없습니다.
+            <a href="${esc(s.estimateUrl)}" target="_blank" style="color:#1a56db;margin-left:8px">새 탭에서 견적서 보기 →</a>
+          </div>
+        </div>`;
+    }).join('');
+
+  document.getElementById('sheetPreview').innerHTML = `
+    <div class="vendor-sheet" id="printArea">
+      <div class="vs-title">대학연계 참학력 공동교육과정 수업운영비 신청서(${YEAR}학년도 ${TERM})</div>
+      <table class="vs-info-table">
+        <tr>
+          <td class="lbl-cell">대학명</td><td>${esc(c.univName)}</td>
+          <td class="lbl-cell">배송지</td><td>${esc(d.address||'')} ${esc(d.building||'')}</td>
+        </tr>
+        <tr>
+          <td class="lbl-cell">강의명</td><td>${esc(c.courseName)}</td>
+          <td class="lbl-cell">수령인명</td><td>${esc(d.recipient||'')} (${esc(d.phone||'')})</td>
+        </tr>
+      </table>
+
+      <table class="vs-table">
+        <thead>
+          <tr>
+            <th style="width:30px">순</th><th>품명</th><th>준비물 링크/견적</th>
+            <th>산출내역</th><th>소계(A)</th><th>배송비(B)</th><th>합계(A+B)</th>
+          </tr>
+        </thead>
+        <tbody>${supplyRows}</tbody>
+      </table>
+      ${!c.noSupply && c.supplies && c.supplies.length ? `<div class="vs-total">총합계: ${fmt(totalAmt)}원</div>` : ''}
+
+      ${estimateImgs ? `<div class="vs-est">견적서(이미지 첨부)</div>${estimateImgs}` : ''}
+    </div>
+  `;
+}
+
+function printSheet() {
+  const content = document.getElementById('sheetPreview');
+  if (!content || !content.innerHTML.trim()) { alert('먼저 강좌를 선택하고 미리보기를 눌러주세요.'); return; }
+
+  const win = window.open('', '_blank', 'width=800,height=900');
+  win.document.write(`<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>${YEAR}학년도 ${TERM} 수업운영비 신청서</title>
+<style>
+  body { font-family: 'Noto Sans KR', sans-serif; margin: 20px; color: #000; }
+  .vs-title { text-align:center; font-size:15px; font-weight:700; margin-bottom:12px; }
+  .vs-info-table { width:100%; border-collapse:collapse; margin-bottom:12px; font-size:12px; }
+  .vs-info-table td { padding:5px 10px; border:1px solid #999; }
+  .vs-info-table .lbl-cell { background:#f0f0f0; font-weight:500; width:80px; }
+  .vs-table { width:100%; border-collapse:collapse; font-size:12px; margin-bottom:8px; }
+  .vs-table th { background:#e8eaf6; padding:6px 8px; border:1px solid #999; text-align:center; font-weight:700; }
+  .vs-table td { padding:5px 8px; border:1px solid #999; text-align:right; }
+  .vs-table td.left { text-align:left; }
+  .vs-table td.center { text-align:center; }
+  .vs-total { text-align:right; font-size:13px; font-weight:700; margin-top:6px; }
+  .vs-est { margin-top:14px; font-size:12px; font-weight:700; }
+  .vs-est-img { max-width:100%; margin-top:8px; border:1px solid #ddd; border-radius:4px; display:block; }
+  a { color:#1a56db; }
+  @media print { body { margin:10px; } }
+</style>
+</head>
+<body>
+${content.innerHTML}
+<script>
+  // 이미지 로딩 완료 후 인쇄
+  const imgs = document.querySelectorAll('img');
+  if (imgs.length === 0) {
+    window.print();
+  } else {
+    let loaded = 0;
+    imgs.forEach(img => {
+      if (img.complete) { loaded++; if (loaded === imgs.length) window.print(); }
+      else {
+        img.onload = img.onerror = () => { loaded++; if (loaded === imgs.length) window.print(); };
+      }
+    });
+  }
+<\/script>
+</body>
+</html>`);
+  win.document.close();
+}
+
+async function exportAllSheets() {
+  alert('일괄 CSV 내보내기를 시작합니다. 잠시 기다려주세요.');
+  await exportCsv('all');
+}
+
+// ── 유틸 ───────────────────────────────────────────
+function showOverlay(title, sub) {
+  document.getElementById('ovTitle').textContent = title;
+  document.getElementById('ovSub').textContent = sub || 'Google 서버와 통신 중입니다.\n잠시만 기다려주세요.';
+  document.getElementById('overlay').classList.remove('hidden');
+}
+function hideOverlay() {
+  document.getElementById('overlay').classList.add('hidden');
+}
+async function api(payload) {
+  const res = await fetch(SCRIPT_URL, {
+    method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload),
+  });
+  return res.json();
+}
+function fmt(n) { return Number(n||0).toLocaleString('ko-KR'); }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function today() { return new Date().toISOString().slice(0,10).replace(/-/g,''); }
+</script>
+</body>
+</html>

@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>꿈키움 준비물 신청</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f5fb;--card:#fff;--accent:#1a56db;--accent-l:#eef2ff;
+  --ok:#15803d;--ok-bg:#dcfce7;--warn:#b45309;--warn-bg:#fef3c7;
+  --err:#b91c1c;--err-bg:#fee2e2;--text:#1e1e2e;--sub:#6b7280;
+  --border:#e5e7eb;--r:10px;--sh:0 1px 4px rgba(0,0,0,.08)
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.header{background:var(--accent);color:#fff;padding:18px 24px}
+.header-inner{max-width:780px;margin:0 auto}
+.header h1{font-size:17px;font-weight:700}
+.header p{font-size:12px;opacity:.8;margin-top:3px}
+.wrap{max-width:780px;margin:0 auto;padding:22px 14px 80px}
+
+/* 카드 */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:14px;box-shadow:var(--sh)}
+.sec-title{font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.count-badge{background:var(--accent);color:#fff;border-radius:99px;font-size:11px;padding:2px 8px}
+
+/* 버튼 */
+.btn{padding:10px 18px;border:none;border-radius:8px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:.15s;white-space:nowrap}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:#1446c0}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-err{background:#dc2626;color:#fff}.btn-err:hover{background:#b91c1c}
+.btn-ghost{background:transparent;color:var(--accent);border:1.5px solid var(--accent)}.btn-ghost:hover{background:var(--accent-l)}
+.btn-ok{background:#16a34a;color:#fff}.btn-ok:hover{background:#15803d}
+.btn-warn{background:#d97706;color:#fff}.btn-warn:hover{background:#b45309}
+
+/* 알림 */
+.alert{padding:11px 15px;border-radius:8px;font-size:13px;margin-bottom:12px;line-height:1.6}
+.alert-ok{background:var(--ok-bg);color:var(--ok)}
+.alert-err{background:var(--err-bg);color:var(--err)}
+.alert-warn{background:var(--warn-bg);color:var(--warn)}
+.alert-info{background:var(--accent-l);color:var(--accent)}
+
+/* 뱃지 */
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700}
+.b-gray{background:#f3f4f6;color:#4b5563}
+.b-ok{background:var(--ok-bg);color:var(--ok)}
+.b-err{background:var(--err-bg);color:var(--err)}
+.b-warn{background:var(--warn-bg);color:var(--warn)}
+.b-open{background:#dcfce7;color:#15803d}
+.b-closed{background:#f3f4f6;color:#9ca3af}
+
+/* 강좌정보 그리드 */
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.info-cell{background:var(--bg);border-radius:8px;padding:11px}
+.info-cell .lbl{font-size:10px;color:var(--sub);font-weight:500;letter-spacing:.5px;text-transform:uppercase;margin-bottom:3px}
+.info-cell .val{font-size:14px;font-weight:700}
+
+/* 예산바 */
+.budget-bar{background:var(--bg);border-radius:8px;padding:13px;margin-bottom:14px}
+.bar-top{display:flex;justify-content:space-between;font-size:12px;margin-bottom:7px}
+.bar-track{height:8px;background:#e5e7eb;border-radius:99px;overflow:hidden}
+.bar-fill{height:100%;border-radius:99px;background:var(--accent);transition:width .4s}
+.bar-fill.over{background:#dc2626}
+.bar-note{font-size:12px;color:var(--sub);margin-top:5px}
+
+/* 상태배너 */
+.status-banner{border-radius:10px;padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;gap:12px}
+.sb-open{background:var(--ok-bg);border:1px solid #bbf7d0}
+.sb-closed{background:var(--err-bg);border:1px solid #fecaca}
+.sb-pending{background:var(--warn-bg);border:1px solid #fde68a}
+.sb-nosupply{background:#f0fdf4;border:1px solid #86efac}
+.sb-icon{font-size:20px}
+.sb-info h3{font-size:13px;font-weight:700}
+.sb-info p{font-size:12px;margin-top:2px;opacity:.8}
+
+/* 준비물없음 토글 */
+.no-supply-toggle{display:flex;align-items:center;gap:12px;padding:14px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;margin-bottom:14px}
+.toggle-switch{position:relative;width:44px;height:24px;flex-shrink:0}
+.toggle-switch input{opacity:0;width:0;height:0;position:absolute}
+.toggle-slider{position:absolute;inset:0;background:#d1d5db;border-radius:99px;cursor:pointer;transition:.2s}
+.toggle-slider:before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.toggle-switch input:checked+.toggle-slider{background:#16a34a}
+.toggle-switch input:checked+.toggle-slider:before{transform:translateX(20px)}
+.no-supply-label{font-size:13px;font-weight:500;flex:1}
+.no-supply-sub{font-size:11px;color:var(--sub);margin-top:1px}
+
+/* 배송지 폼 */
+.delivery-form .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-group{margin-bottom:10px}
+.form-group label{display:block;font-size:12px;font-weight:500;color:var(--sub);margin-bottom:4px}
+.form-group input,.form-group textarea,.form-group select{
+  width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;
+  font-family:inherit;font-size:13px;outline:none;transition:.15s;background:#fff
+}
+.form-group input:focus,.form-group textarea:focus{border-color:var(--accent)}
+.form-group input.err{border-color:#dc2626}
+.form-group textarea{resize:vertical;min-height:54px}
+.req{color:#dc2626;margin-left:2px}
+.saved-delivery{background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:12px;font-size:13px;margin-bottom:12px}
+.saved-delivery .row{display:flex;gap:8px;margin-bottom:3px}
+.saved-delivery .dl{color:var(--sub);font-size:12px;min-width:70px}
+
+/* 품목 카드 */
+.item-card{border:1.5px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;position:relative;background:#fafafa}
+.item-card .i-num{font-size:11px;font-weight:700;color:var(--sub);margin-bottom:8px}
+.item-card .i-del{position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;color:#9ca3af;font-size:17px;line-height:1}
+.item-card .i-del:hover{color:#dc2626}
+
+/* 구매방식 선택 */
+.type-toggle{display:flex;gap:6px;margin-bottom:10px}
+.type-btn{flex:1;padding:8px;border:1.5px solid var(--border);border-radius:8px;background:#fff;font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;text-align:center;transition:.15s;color:var(--sub)}
+.type-btn.active-shop{border-color:var(--accent);background:var(--accent-l);color:var(--accent)}
+.type-btn.active-est{border-color:#7c3aed;background:#f5f3ff;color:#7c3aed}
+
+/* 견적서 업로드 */
+.est-zone{border:2px dashed var(--border);border-radius:8px;padding:16px;text-align:center;cursor:pointer;transition:.15s;font-size:13px;color:var(--sub)}
+.est-zone:hover{border-color:var(--accent);background:var(--accent-l)}
+.est-zone input[type=file]{display:none}
+.est-preview{margin-top:8px;max-height:180px;border-radius:6px;max-width:100%}
+.est-name{font-size:12px;margin-top:4px;color:var(--ok)}
+
+/* 링크체크 */
+.link-check{font-size:11px;margin-top:4px;height:16px}
+.lc-ok{color:var(--ok)}.lc-err{color:var(--err)}
+
+/* 수량/단가 행 */
+.price-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.ship-note{font-size:11px;color:var(--warn);margin-top:3px}
+
+/* 합계바 */
+.total-bar{background:linear-gradient(135deg,#1e3a8a,#1a56db);color:#fff;border-radius:10px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+.total-bar .lbl{font-size:12px;opacity:.8}
+.total-bar .amt{font-size:20px;font-weight:700}
+
+/* 준비물 테이블 */
+.supply-table{width:100%;border-collapse:collapse;font-size:12px}
+.supply-table th{text-align:left;padding:7px 9px;border-bottom:2px solid var(--border);color:var(--sub);font-size:11px;font-weight:500}
+.supply-table td{padding:9px;border-bottom:1px solid var(--border);vertical-align:middle}
+.supply-table tr:last-child td{border-bottom:none}
+.supply-table tr:hover td{background:#f9fafb}
+.link-btn{color:var(--accent);font-size:12px;text-decoration:none;background:var(--accent-l);padding:2px 8px;border-radius:5px;display:inline-block}
+.est-link{color:#7c3aed;font-size:12px;text-decoration:none;background:#f5f3ff;padding:2px 8px;border-radius:5px;display:inline-block}
+
+/* 로딩 */
+.loader{display:none;text-align:center;padding:36px;color:var(--sub);font-size:13px}
+.spin{display:inline-block;width:22px;height:22px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* 전체화면 로딩 오버레이 */
+.overlay{position:fixed;inset:0;background:rgba(255,255,255,.85);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;backdrop-filter:blur(2px)}
+.overlay.hidden{display:none!important}
+.overlay .spin-lg{width:40px;height:40px;border:4px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+.overlay .ov-title{font-size:15px;font-weight:700;color:var(--text)}
+.overlay .ov-sub{font-size:13px;color:var(--sub);text-align:center;line-height:1.6}
+.overlay .ov-note{font-size:11px;color:#9ca3af;margin-top:4px}
+
+/* 로그인 탭 */
+.login-tabs{display:flex;gap:0;border:1.5px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px}
+.login-tab{flex:1;padding:9px;text-align:center;font-size:13px;font-weight:500;cursor:pointer;background:#fff;color:var(--sub);transition:.15s;border:none;font-family:inherit}
+.login-tab.on{background:var(--accent);color:#fff}
+/* 담당자 강좌 선택 */
+.course-select-wrap{margin-top:10px}
+.course-select-wrap select{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:13px;outline:none;background:#fff;transition:.15s}
+.course-select-wrap select:focus{border-color:var(--accent)}
+/* 담당자 모드 배너 */
+.manager-banner{background:#fef9c3;border:1.5px solid #fde047;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:13px;color:#713f12;display:flex;align-items:center;gap:10px}
+
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.hidden{display:none!important}
+.tr{text-align:right}
+.tsm{font-size:12px;color:var(--sub)}
+
+/* 신청된 준비물 카드 */
+.supply-item-card{border:1.5px solid var(--border);border-radius:8px;margin-bottom:8px;overflow:hidden}
+.si-view{padding:12px 14px}
+.si-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;gap:8px}
+.si-left{display:flex;align-items:flex-start;gap:10px}
+.si-num{background:var(--accent);color:#fff;border-radius:99px;width:22px;height:22px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.si-name{font-size:13px;font-weight:700}
+.si-right{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.si-prices{display:flex;gap:0;background:var(--bg);border-radius:6px;overflow:hidden;margin-bottom:10px}
+.si-price-cell{flex:1;padding:7px 10px;text-align:center;border-right:1px solid var(--border)}
+.si-price-cell:last-child{border-right:none}
+.si-total{background:var(--accent-l)}
+.si-plbl{font-size:10px;color:var(--sub);margin-bottom:2px}
+.si-pval{font-size:12px;font-weight:700}
+.si-footer{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.si-edit{padding:14px;background:#fafafa;border-top:1px solid var(--border)}
+</style>
+</head>
+<body>
+
+<!-- 전체화면 로딩 오버레이 -->
+<div class="overlay hidden" id="overlay">
+  <div class="spin-lg"></div>
+  <div class="ov-title" id="ovTitle">처리 중...</div>
+  <div class="ov-sub" id="ovSub">Google 서버와 통신 중입니다.<br>잠시만 기다려주세요.</div>
+  <div class="ov-note">※ Google Sheets 연동으로 인해 10~20초 소요될 수 있습니다</div>
+</div>
+
+<div class="header">
+  <div class="header-inner">
+    <h1>꿈키움 준비물 신청 시스템</h1>
+    <p id="headerDesc">2026학년도 1학기</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ── 로그인 ── -->
+  <div id="loginSec">
+    <div class="card">
+      <div class="sec-title">접근 방식 선택</div>
+
+      <!-- 탭 -->
+      <div class="login-tabs">
+        <button class="login-tab on" id="tab-prof" onclick="switchLoginTab('prof')">강사 (강좌코드)</button>
+        <button class="login-tab" id="tab-mgr" onclick="switchLoginTab('mgr')">대학 담당자 (대학코드)</button>
+      </div>
+
+      <!-- 강사 탭 -->
+      <div id="loginProf">
+        <p class="tsm" style="margin-bottom:10px">담당 강좌의 코드를 입력하세요. 강좌코드는 대학 담당자에게 안내받을 수 있습니다.</p>
+        <div style="display:flex;gap:10px">
+          <input type="text" id="codeInput" placeholder="강좌코드 입력 (예: A001)"
+            style="flex:1;padding:11px 13px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;outline:none;transition:.15s;text-transform:uppercase;letter-spacing:1px"
+            onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"
+            onkeydown="if(event.key==='Enter')load()">
+          <button class="btn btn-primary" onclick="load()">조회</button>
+        </div>
+      </div>
+
+      <!-- 담당자 탭 -->
+      <div id="loginMgr" class="hidden">
+        <p class="tsm" style="margin-bottom:10px">대학코드를 입력하면 소속 강좌 목록이 나타납니다. 수정할 강좌를 선택하세요.</p>
+        <div style="display:flex;gap:10px;margin-bottom:10px">
+          <input type="text" id="univCodeInput" placeholder="대학코드 입력 (예: KJ01)"
+            style="flex:1;padding:11px 13px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:14px;outline:none;transition:.15s;text-transform:uppercase;letter-spacing:1px"
+            onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"
+            onkeydown="if(event.key==='Enter')loadUniv()">
+          <button class="btn btn-primary" onclick="loadUniv()">조회</button>
+        </div>
+        <div id="courseSelectWrap" class="course-select-wrap hidden">
+          <select id="courseSelect" onchange="loadSelectedCourse()">
+            <option value="">── 강좌를 선택하세요 ──</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="loginErr" style="margin-top:10px;display:none" class="alert alert-err"></div>
+    </div>
+    <div class="loader" id="loginLoader"><div class="spin"></div><br>불러오는 중...</div>
+  </div>
+
+  <!-- ── 메인 ── -->
+  <div id="mainSec" class="hidden">
+
+    <!-- 담당자 모드 배너 -->
+    <div id="managerBanner" class="manager-banner hidden">
+      <span style="font-size:18px">🏫</span>
+      <div>
+        <div style="font-weight:700;margin-bottom:2px" id="managerBannerTitle"></div>
+        <div style="font-size:12px">담당자 수정 모드 · 이 강좌의 준비물 및 배송지를 수정할 수 있습니다</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="backToUnivList()" style="margin-left:auto">← 강좌 목록</button>
+    </div>
+
+    <!-- 상태 배너 -->
+    <div id="statusBanner" class="status-banner sb-pending">
+      <span class="sb-icon" id="sbIcon">📋</span>
+      <div class="sb-info"><h3 id="sbTitle"></h3><p id="sbDesc"></p></div>
+    </div>
+
+    <!-- 강좌 정보 -->
+    <div class="card">
+      <div class="sec-title">강좌 정보</div>
+      <div class="info-grid">
+        <div class="info-cell"><div class="lbl">강좌명</div><div class="val" id="iName"></div></div>
+        <div class="info-cell"><div class="lbl">담당 강사</div><div class="val" id="iProf"></div></div>
+        <div class="info-cell"><div class="lbl">대학</div><div class="val" id="iUniv"></div></div>
+        <div class="info-cell"><div class="lbl">강좌코드</div><div class="val" id="iCode"></div></div>
+      </div>
+      <div class="budget-bar">
+        <div class="bar-top"><span>예산 사용 현황</span><span id="budgetSum" style="font-weight:700"></span></div>
+        <div class="bar-track"><div class="bar-fill" id="barFill" style="width:0%"></div></div>
+        <div class="bar-note" id="barNote"></div>
+      </div>
+      <div id="courseAlerts"></div>
+    </div>
+
+    <!-- 준비물 없음 토글 -->
+    <div id="noSupplyBlock" class="card">
+      <div class="sec-title">준비물 필요 여부</div>
+      <div class="no-supply-toggle">
+        <label class="toggle-switch">
+          <input type="checkbox" id="noSupplyChk" onchange="toggleNoSupply()">
+          <span class="toggle-slider"></span>
+        </label>
+        <div>
+          <div class="no-supply-label">이 강좌는 준비물이 없습니다 (해당없음)</div>
+          <div class="no-supply-sub">선택하면 품목 입력란이 숨겨지고 '해당없음'으로 처리됩니다</div>
+        </div>
+      </div>
+      <div id="noSupplyAlert" class="hidden"></div>
+    </div>
+
+    <!-- 배송지 정보 -->
+    <div class="card" id="deliverySec">
+      <div class="sec-title">배송지 정보 <span style="font-size:11px;font-weight:400;color:var(--sub);margin-left:4px">※ 강좌 준비물 수령 장소를 입력하세요</span></div>
+      <div id="savedDelivery" class="hidden"></div>
+      <div class="delivery-form">
+        <div class="form-group">
+          <label>배송 주소 (도로명 주소) <span class="req">*</span></label>
+          <input type="text" id="dAddress" placeholder="예: 충남 천안시 동남구 백석대학로 1-2">
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>건물명 및 호수 <span class="req">*</span></label>
+            <input type="text" id="dBuilding" placeholder="예: 107호 교무처">
+          </div>
+          <div class="form-group">
+            <label>수령인명 <span class="req">*</span></label>
+            <input type="text" id="dRecipient" placeholder="예: 홍길동">
+          </div>
+          <div class="form-group">
+            <label>수령인 연락처 <span class="req">*</span></label>
+            <input type="tel" id="dPhone" placeholder="예: 010-1234-5678">
+          </div>
+          <div class="form-group">
+            <label>배송 메모</label>
+            <input type="text" id="dMemo" placeholder="예: 부재시 경비실 보관">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ok btn-sm" onclick="saveDelivery()">배송지 저장</button>
+          <div id="deliveryMsg" style="font-size:12px;line-height:2;color:var(--ok)"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 기존 준비물 목록 -->
+    <div class="card" id="supplyListSec">
+      <div class="sec-title">신청된 준비물 <span class="count-badge" id="supplyCount">0</span></div>
+      <div id="supplyList"></div>
+      <div id="totalBar" class="total-bar hidden">
+        <div><div class="lbl">신청 합계</div><div class="amt" id="totalAmt"></div></div>
+        <div class="tsm" style="opacity:.8;text-align:right">가용예산: <span id="budgetLbl"></span></div>
+      </div>
+    </div>
+
+    <!-- 피드백 -->
+    <div id="feedbackSec" class="hidden">
+      <div class="alert alert-warn">
+        <div style="font-weight:700;margin-bottom:3px">📢 담당자 피드백</div>
+        <div id="feedbackMsg"></div>
+      </div>
+    </div>
+
+    <!-- 품목 추가 폼 -->
+    <div class="card" id="addFormSec">
+      <div class="sec-title">준비물 추가 입력</div>
+      <!-- 승인 잠금 배너 -->
+      <div id="approvedLockBanner" class="hidden">
+        <div class="alert alert-ok" style="margin-bottom:12px">
+          <div style="font-weight:700;margin-bottom:3px">🔒 승인 완료 — 입력이 잠겼습니다</div>
+          <div>승인된 항목이 있어 추가 입력 및 수정이 제한됩니다. 변경이 필요한 경우 충남교육청 중등교육과 (041-640-7221)로 문의해주세요.</div>
+        </div>
+      </div>
+      <div id="addAlert"></div>
+      <div id="itemsContainer"></div>
+      <button class="btn btn-ghost btn-sm" onclick="addItem()" style="margin-bottom:14px">+ 품목 추가</button>
+      <div class="actions">
+        <button class="btn btn-ok" onclick="submitAll()">제출하기</button>
+        <button class="btn btn-ghost" onclick="resetForm()">초기화</button>
+      </div>
+      <div class="loader" id="submitLoader"><div class="spin"></div><br>제출 중...</div>
+    </div>
+
+    <div style="text-align:center;margin-top:20px">
+      <button class="btn btn-ghost btn-sm" onclick="loginMode==='mgr' ? backToUnivList() : location.reload()">
+        ← 처음으로 돌아가기
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxjbaygQzxTA4fYzT1lw5weYCBGe-QJsPwb2mLdCS_puf4wm7LpLDL4JtcB5Lj1fWX4fQ/exec';
+
+let course = null, supplies = [], itemCount = 0;
+let loginMode = 'prof';
+let univCourses = [], univName = '';
+let YEAR = '2026', TERM = '여름방학';  // 설정 시트에서 덮어씀
+
+// ── 설정 로드 (페이지 시작 시) ──────────────────────
+async function loadSettings() {
+  try {
+    const res = await api({ action: 'getSettings' });
+    if (res.ok) {
+      YEAR = res.year;
+      TERM = res.term;
+    }
+  } catch(e) {}
+  // 헤더 업데이트
+  document.querySelector('.header h1').textContent = '꿈키움 준비물 신청 시스템';
+  document.getElementById('headerDesc').textContent = `${YEAR}학년도 ${TERM}`;
+}
+
+window.addEventListener('DOMContentLoaded', loadSettings);
+
+// ── 탭 전환 ────────────────────────────────────────
+function switchLoginTab(tab) {
+  loginMode = tab;
+  document.getElementById('tab-prof').classList.toggle('on', tab === 'prof');
+  document.getElementById('tab-mgr').classList.toggle('on', tab === 'mgr');
+  document.getElementById('loginProf').classList.toggle('hidden', tab !== 'prof');
+  document.getElementById('loginMgr').classList.toggle('hidden', tab !== 'mgr');
+  document.getElementById('loginErr').style.display = 'none';
+}
+
+// ── 강사 로드 ──────────────────────────────────────
+async function load() {
+  const code = document.getElementById('codeInput').value.trim().toUpperCase();
+  if (!code) { showLoginErr('강좌코드를 입력해주세요.'); return; }
+  showOverlay('강좌 정보를 불러오는 중...', '강좌코드를 확인하고 준비물 현황을 조회합니다.');
+  hide('loginErr');
+  try {
+    const res = await api({ action: 'getCourse', courseCode: code });
+    if (!res.ok) { showLoginErr(res.msg); return; }
+    course = res.course; supplies = res.supplies || [];
+    loginMode = 'prof';
+    document.getElementById('headerDesc').textContent = `${YEAR}학년도 ${TERM} · 강사`;
+    renderMain(res.delivery);
+    hide('loginSec'); show('mainSec');
+  } catch(e) { showLoginErr('서버 연결 실패. 잠시 후 다시 시도해주세요.'); }
+  finally { hideOverlay(); }
+}
+
+// ── 담당자: 대학코드로 강좌 목록 조회 ──────────────
+async function loadUniv() {
+  const code = document.getElementById('univCodeInput').value.trim().toUpperCase();
+  if (!code) { showLoginErr('대학코드를 입력해주세요.'); return; }
+  showOverlay('대학 강좌 목록 조회 중...', '소속 강좌 전체를 불러옵니다.');
+  hide('loginErr');
+  try {
+    const res = await api({ action: 'getUnivCourses', univCode: code });
+    if (!res.ok) { showLoginErr(res.msg); return; }
+    univCourses = res.courses || [];
+    univName = res.univName || '';
+
+    if (!univCourses.length) { showLoginErr('해당 대학에 등록된 강좌가 없습니다.'); return; }
+
+    // 드롭다운 채우기
+    const sel = document.getElementById('courseSelect');
+    sel.innerHTML = '<option value="">── 강좌를 선택하세요 ──</option>';
+    univCourses.forEach(c => {
+      const o = document.createElement('option');
+      o.value = c.courseCode;
+      const tag = c.noSupply ? '[해당없음]' : c.supplies && c.supplies.length ? `[${c.supplies.length}개]` : '[미신청]';
+      o.textContent = `[${c.courseCode}] ${c.courseName} · ${c.profName} ${tag}`;
+      sel.appendChild(o);
+    });
+    show('courseSelectWrap');
+  } catch(e) { showLoginErr('서버 연결 실패.'); }
+  finally { hideOverlay(); }
+}
+
+// ── 담당자: 강좌 선택 후 로드 ──────────────────────
+async function loadSelectedCourse() {
+  const code = document.getElementById('courseSelect').value;
+  if (!code) return;
+  showOverlay('강좌 상세 불러오는 중...', '준비물 신청 현황과 배송지 정보를 조회합니다.');
+  try {
+    const res = await api({ action: 'getCourse', courseCode: code });
+    if (!res.ok) { showLoginErr(res.msg); return; }
+    course = res.course; supplies = res.supplies || [];
+    loginMode = 'mgr';
+    document.getElementById('headerDesc').textContent = `${YEAR}학년도 ${TERM} · ${univName} 담당자`;
+    document.getElementById('managerBannerTitle').textContent = `${univName} · ${course.courseName} (${course.courseCode})`;
+    renderMain(res.delivery);
+    hide('loginSec');
+    show('mainSec');
+    show('managerBanner');
+  } catch(e) { showLoginErr('서버 연결 실패.'); }
+  finally { hideOverlay(); }
+}
+
+// ── 담당자: 강좌 목록으로 돌아가기 ────────────────
+function backToUnivList() {
+  course = null; supplies = []; itemCount = 0;
+  document.getElementById('itemsContainer').innerHTML = '';
+  hide('mainSec'); hide('managerBanner');
+  show('loginSec');
+  document.getElementById('courseSelect').value = '';
+}
+
+function showLoginErr(msg) {
+  const el = document.getElementById('loginErr');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+// ── 메인 렌더 ──────────────────────────────────────
+function renderMain(delivery) {
+  renderStatus();
+  document.getElementById('iName').textContent = course.courseName;
+  document.getElementById('iProf').textContent = course.profName;
+  document.getElementById('iUniv').textContent = course.univName;
+  document.getElementById('iCode').textContent = course.courseCode;
+  renderBudget();
+  renderDelivery(delivery);
+  renderSupplyList();
+  renderFeedback();
+
+  // 준비물없음 토글
+  document.getElementById('noSupplyChk').checked = course.noSupply;
+  applyNoSupply(course.noSupply, false);
+
+  if (course.status === '폐강') {
+    hide('addFormSec');
+  } else if (!course.noSupply) {
+    // 폼 완전 초기화 후 빈 항목 1개만 추가
+    document.getElementById('itemsContainer').innerHTML = '';
+    itemCount = 0;
+    addItem();
+  }
+}
+
+function renderStatus() {
+  const map = {
+    '개설예정': { cls:'sb-pending', icon:'📋', title:'수강신청 집계 중', desc:'4월 21일 이후 수강인원 및 예산이 확정됩니다.' },
+    '개설확정': { cls:'sb-open', icon:'✅', title:'강좌 개설 확정', desc:`수강인원 ${course.students}명 · 가용예산 ${fmt(course.budget)}원` },
+    '폐강':     { cls:'sb-closed', icon:'🚫', title:'폐강 강좌', desc:'수강신청 인원 미달로 폐강되었습니다. 준비물 신청이 불가합니다.' },
+  };
+  const s = map[course.status] || map['개설예정'];
+  const b = document.getElementById('statusBanner');
+  b.className = 'status-banner ' + s.cls;
+  document.getElementById('sbIcon').textContent = s.icon;
+  document.getElementById('sbTitle').textContent = s.title;
+  document.getElementById('sbDesc').textContent = s.desc;
+}
+
+function renderBudget() {
+  const total = supplies.reduce((s, r) => s + (Number(r.subTotal)||0) + (Number(r.shipping)||0), 0);
+  const budget = Number(course.budget) || 0;
+  const pct = budget > 0 ? Math.min(total / budget * 100, 100) : 0;
+  const over = budget > 0 && total > budget;
+  document.getElementById('barFill').style.width = pct + '%';
+  document.getElementById('barFill').className = 'bar-fill' + (over ? ' over' : '');
+  document.getElementById('budgetSum').textContent = budget > 0 ? `${fmt(total)}원 / ${fmt(budget)}원` : '예산 미확정';
+  document.getElementById('barNote').textContent = budget > 0
+    ? (over ? `⚠ 예산 초과 ${fmt(total - budget)}원` : `잔여 ${fmt(budget - total)}원`)
+    : '수강인원 확정 후 예산이 결정됩니다 (수강인원 × 30,000원)';
+  document.getElementById('courseAlerts').innerHTML =
+    over ? '<div class="alert alert-err">예산을 초과하고 있습니다. 품목 금액을 조정해주세요.</div>' : '';
+}
+
+function renderDelivery(delivery) {
+  if (delivery && delivery.address) {
+    const el = document.getElementById('savedDelivery');
+    el.innerHTML = `
+      <div class="saved-delivery">
+        <div style="font-size:12px;font-weight:700;color:var(--ok);margin-bottom:6px">✓ 저장된 배송지</div>
+        <div class="row"><span class="dl">주소</span><span>${esc(delivery.address)} ${esc(delivery.building)}</span></div>
+        <div class="row"><span class="dl">수령인</span><span>${esc(delivery.recipient)} · ${esc(delivery.phone)}</span></div>
+        ${delivery.memo ? `<div class="row"><span class="dl">메모</span><span>${esc(delivery.memo)}</span></div>` : ''}
+      </div>`;
+    el.classList.remove('hidden');
+    // 폼에 기존값 채우기
+    document.getElementById('dAddress').value   = delivery.address || '';
+    document.getElementById('dBuilding').value  = delivery.building || '';
+    document.getElementById('dRecipient').value = delivery.recipient || '';
+    document.getElementById('dPhone').value     = delivery.phone || '';
+    document.getElementById('dMemo').value      = delivery.memo || '';
+  }
+}
+
+function renderSupplyList() {
+  const count = supplies.length;
+  document.getElementById('supplyCount').textContent = count;
+  const list = document.getElementById('supplyList');
+
+  if (count === 0) {
+    list.innerHTML = '<p class="tsm" style="text-align:center;padding:18px;color:#9ca3af">신청된 준비물이 없습니다.</p>';
+    hide('totalBar'); return;
+  }
+
+  const total = supplies.reduce((s, r) => s + (Number(r.subTotal)||0) + (Number(r.shipping)||0), 0);
+  show('totalBar');
+  document.getElementById('totalAmt').textContent = fmt(total) + '원';
+  document.getElementById('budgetLbl').textContent = Number(course.budget) > 0 ? fmt(course.budget) + '원' : '미확정';
+
+  const sLabel = { '검토전':'b-gray', '승인':'b-ok', '반려':'b-err', '수정요청':'b-warn' };
+
+  // 승인된 항목이 하나라도 있으면 추가 폼 잠금
+  const hasApproved = supplies.some(s => s.status === '승인');
+  const lockBanner = document.getElementById('approvedLockBanner');
+  if (hasApproved) {
+    lockBanner.classList.remove('hidden');
+    document.getElementById('itemsContainer').innerHTML = '';
+    itemCount = 0;  // ← 카운터 초기화
+    document.querySelectorAll('#addFormSec button, #addFormSec input, #addFormSec textarea, #addFormSec select')
+      .forEach(el => { el.disabled = true; el.style.opacity = '0.4'; });
+  } else {
+    lockBanner.classList.add('hidden');
+  }
+
+  // 품목 카드 목록으로 렌더링 (테이블 대신 카드 방식 — 수정 모드 토글이 용이)
+  list.innerHTML = supplies.map((s, idx) => {
+    const approved = s.status === '승인';
+    const rowId = s.rowId;
+    const isShop = (s.purchaseType !== '견적서');
+    return `
+    <div class="supply-item-card" id="scard_${rowId}">
+      <!-- 보기 모드 -->
+      <div id="sview_${rowId}" class="si-view">
+        <div class="si-header">
+          <div class="si-left">
+            <span class="si-num">${idx + 1}</span>
+            <div>
+              <div class="si-name">${esc(s.itemName)}</div>
+              ${s.note ? `<div class="tsm" style="margin-top:2px">${esc(s.note)}</div>` : ''}
+            </div>
+          </div>
+          <div class="si-right">
+            <span class="badge ${s.purchaseType==='견적서'?'b-warn':'b-gray'}">${esc(s.purchaseType||'쇼핑몰')}</span>
+            <span class="badge ${sLabel[s.status]||'b-gray'}">${esc(s.status)}</span>
+            ${approved ? '<span class="tsm" style="color:var(--ok);font-size:11px">🔒</span>' : ''}
+          </div>
+        </div>
+        <div class="si-prices">
+          <div class="si-price-cell"><div class="si-plbl">수량</div><div class="si-pval">${s.qty}</div></div>
+          <div class="si-price-cell"><div class="si-plbl">단가</div><div class="si-pval">${fmt(s.unitPrice)}원</div></div>
+          <div class="si-price-cell"><div class="si-plbl">소계</div><div class="si-pval">${fmt(s.subTotal)}원</div></div>
+          <div class="si-price-cell"><div class="si-plbl">배송비</div><div class="si-pval">${fmt(s.shipping)}원</div></div>
+          <div class="si-price-cell si-total"><div class="si-plbl">합계</div><div class="si-pval">${fmt((Number(s.subTotal)||0)+(Number(s.shipping)||0))}원</div></div>
+        </div>
+        <div class="si-footer">
+          <div>
+            ${isShop
+              ? (s.link ? `<a class="link-btn" href="${esc(s.link)}" target="_blank">🔗 쇼핑몰 링크</a>` : '<span class="tsm" style="color:#9ca3af">링크 없음</span>')
+              : (s.estimateUrl ? `<a class="est-link" href="${esc(s.estimateUrl)}" target="_blank">📄 견적서 보기</a>` : '<span class="tsm" style="color:#9ca3af">견적서 미첨부</span>')}
+          </div>
+          <div style="display:flex;gap:6px">
+            ${approved ? '' : `<button class="btn btn-ghost btn-sm" onclick="startEdit('${rowId}')">✏ 수정</button>`}
+            ${approved ? '' : `<button class="btn btn-err btn-sm" onclick="delItem('${rowId}')">삭제</button>`}
+          </div>
+        </div>
+      </div>
+
+      <!-- 수정 모드 -->
+      <div id="sedit_${rowId}" class="si-edit hidden">
+        <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:10px">✏ ${idx+1}번 품목 수정</div>
+
+        <div class="form-group">
+          <label>품명 <span class="req">*</span></label>
+          <input type="text" id="ef_name_${rowId}" value="${esc(s.itemName)}">
+        </div>
+
+        <div class="price-row">
+          <div class="form-group">
+            <label>수량 <span class="req">*</span></label>
+            <input type="number" id="ef_qty_${rowId}" value="${s.qty}" min="1">
+          </div>
+          <div class="form-group">
+            <label>단가 (원)</label>
+            <input type="number" id="ef_unit_${rowId}" value="${s.unitPrice||0}" min="0">
+          </div>
+          <div class="form-group" id="ef_shipwrap_${rowId}" ${!isShop?'style="display:none"':''}>
+            <label>배송비 (원)</label>
+            <input type="number" id="ef_ship_${rowId}" value="${s.shipping||0}" min="0">
+            <div class="ship-note">없으면 0 입력</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:10px">
+          <div style="display:flex;gap:6px;margin-bottom:8px">
+            <button class="type-btn ${isShop?'active-shop':''}" id="etb_shop_${rowId}"
+              onclick="setEditType('${rowId}','쇼핑몰')">🛒 쇼핑몰</button>
+            <button class="type-btn ${!isShop?'active-est':''}" id="etb_est_${rowId}"
+              onclick="setEditType('${rowId}','견적서')">📄 견적서</button>
+          </div>
+
+          <div id="ef_shopzone_${rowId}" ${!isShop?'style="display:none"':''}>
+            <div class="form-group">
+              <label>쇼핑몰 링크</label>
+              <input type="url" id="ef_link_${rowId}" value="${esc(s.link||'')}" placeholder="https://..." oninput="chkLink(this)">
+              <div class="link-check"></div>
+            </div>
+          </div>
+
+          <div id="ef_estzone_${rowId}" ${isShop?'style="display:none"':''}>
+            <label style="font-size:12px;font-weight:500;color:var(--sub);display:block;margin-bottom:4px">견적서 이미지 교체</label>
+            ${s.estimateUrl ? `<div style="margin-bottom:6px"><a class="est-link" href="${esc(s.estimateUrl)}" target="_blank">📄 현재 견적서 보기</a></div>` : ''}
+            <div class="est-zone" onclick="document.getElementById('ef_file_${rowId}').click()">
+              <input type="file" id="ef_file_${rowId}" accept="image/*,.pdf" onchange="previewEst(this,'ef_prev_${rowId}')">
+              <div id="ef_prev_${rowId}">클릭하여 새 파일 선택 (선택 안 하면 기존 유지)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>비고</label>
+          <input type="text" id="ef_note_${rowId}" value="${esc(s.note||'')}" placeholder="색상, 상품선택사항 등 세부사항 기재">
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn btn-ok btn-sm" onclick="saveEdit('${rowId}')">저장</button>
+          <button class="btn btn-ghost btn-sm" onclick="cancelEdit('${rowId}')">취소</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // 합계 요약 바
+  document.getElementById('totalAmt').textContent = fmt(total) + '원';
+}
+
+// ── 인라인 수정 제어 ────────────────────────────────
+function startEdit(rowId) {
+  document.getElementById('sview_' + rowId).classList.add('hidden');
+  document.getElementById('sedit_' + rowId).classList.remove('hidden');
+}
+
+function cancelEdit(rowId) {
+  document.getElementById('sedit_' + rowId).classList.add('hidden');
+  document.getElementById('sview_' + rowId).classList.remove('hidden');
+}
+
+function setEditType(rowId, type) {
+  const isShop = type === '쇼핑몰';
+  document.getElementById('etb_shop_' + rowId).className = 'type-btn' + (isShop ? ' active-shop' : '');
+  document.getElementById('etb_est_'  + rowId).className = 'type-btn' + (!isShop ? ' active-est' : '');
+  document.getElementById('ef_shopzone_'  + rowId).style.display = isShop ? '' : 'none';
+  document.getElementById('ef_estzone_'   + rowId).style.display = isShop ? 'none' : '';
+  document.getElementById('ef_shipwrap_'  + rowId).style.display = isShop ? '' : 'none';
+}
+
+function previewEst(input, previewId) {
+  const file = input.files[0];
+  if (!file) return;
+  const prev = document.getElementById(previewId);
+  if (!prev) return;  // 요소 없으면 무시
+  prev.textContent = '✓ ' + file.name;
+  if (file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = document.createElement('img');
+      img.src = e.target.result;
+      img.style.cssText = 'max-height:120px;margin-top:6px;border-radius:4px;display:block';
+      prev.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+async function saveEdit(rowId) {
+  const s = supplies.find(x => x.rowId === rowId);
+  if (!s) return;
+
+  const itemName = document.getElementById('ef_name_' + rowId).value.trim();
+  const qty      = Number(document.getElementById('ef_qty_'  + rowId).value) || 0;
+  const unitPrice= Number(document.getElementById('ef_unit_' + rowId).value) || 0;
+  const shipping = Number(document.getElementById('ef_ship_' + rowId)?.value) || 0;
+  const note     = document.getElementById('ef_note_' + rowId).value.trim();
+  const isShop   = document.getElementById('etb_shop_' + rowId).classList.contains('active-shop');
+  const purchaseType = isShop ? '쇼핑몰' : '견적서';
+  const link     = isShop ? document.getElementById('ef_link_' + rowId).value.trim() : '';
+
+  if (!itemName) { alert('품명을 입력해주세요.'); return; }
+  if (qty < 1)   { alert('수량을 입력해주세요.'); return; }
+
+  // 예산 초과 체크 (이 항목 제외한 나머지 + 수정값)
+  const budget = Number(course.budget) || 0;
+  if (budget > 0) {
+    const otherTotal = supplies
+      .filter(x => x.rowId !== rowId)
+      .reduce((sum, x) => sum + (Number(x.subTotal)||0) + (Number(x.shipping)||0), 0);
+    const thisTotal = qty * unitPrice + shipping;
+    if (otherTotal + thisTotal > budget) {
+      alert(
+        `예산을 초과하여 저장할 수 없습니다.\n\n` +
+        `가용 예산: ${fmt(budget)}원\n` +
+        `다른 항목 합계: ${fmt(otherTotal)}원\n` +
+        `이 항목: ${fmt(thisTotal)}원\n` +
+        `합계: ${fmt(otherTotal + thisTotal)}원 (${fmt(otherTotal + thisTotal - budget)}원 초과)\n\n` +
+        `문의: 충남교육청 중등교육과  ☎ 041-640-7221`
+      );
+      return;
+    }
+  }
+
+  showOverlay('수정 내용 저장 중...', '변경 사항을 서버에 반영합니다.');
+  try {
+    // 변경된 필드들 순차 업데이트
+    const fields = [
+      ['품명', itemName], ['수량', qty], ['단가', unitPrice],
+      ['배송비', shipping], ['비고', note], ['구매방식', purchaseType],
+    ];
+    if (isShop) fields.push(['쇼핑몰링크', link]);
+
+    for (const [field, value] of fields) {
+      await api({ action: 'updateSupply', rowId, field, value });
+    }
+
+    // 견적서 새 파일이 있으면 업로드
+    if (!isShop) {
+      const fileInput = document.getElementById('ef_file_' + rowId);
+      if (fileInput && fileInput.files[0]) {
+        updateOverlay('견적서 이미지 업로드 중...', '');
+        try {
+          const url = await uploadEstimate(rowId, fileInput.files[0], null, null);
+          // 업로드 성공 시 클라이언트 배열에 URL 직접 반영
+          const target = supplies.find(s => s.rowId === rowId);
+          if (target && url) target.estimateUrl = url;
+        } catch(uploadErr) {
+          console.error('견적서 업로드 실패:', uploadErr);
+        }
+      }
+    }
+
+    // 클라이언트 supplies 배열 직접 업데이트 (서버 재조회 없음)
+    const target = supplies.find(s => s.rowId === rowId);
+    if (target) {
+      target.itemName     = itemName;
+      target.qty          = qty;
+      target.unitPrice    = unitPrice;
+      target.subTotal     = qty * unitPrice;
+      target.shipping     = shipping;
+      target.totalPrice   = qty * unitPrice + shipping;
+      target.note         = note;
+      target.purchaseType = purchaseType;
+      if (isShop) { target.link = link; target.estimateUrl = target.estimateUrl || ''; }
+      else        { target.link = ''; }
+    }
+    renderSupplyList(); renderBudget();
+  } catch(e) { alert('저장 실패. 다시 시도해주세요.'); }
+  finally { hideOverlay(); }
+}
+
+function renderFeedback() {
+  const hasIssue = supplies.some(s => s.status === '반려' || s.status === '수정요청');
+  if (hasIssue) {
+    document.getElementById('feedbackMsg').textContent = '일부 품목이 반려 또는 수정 요청되었습니다. 아래 목록에서 확인 후 수정해주세요.';
+    show('feedbackSec');
+  }
+}
+
+// ── 준비물없음 토글 ─────────────────────────────────
+async function toggleNoSupply() {
+  const val = document.getElementById('noSupplyChk').checked;
+  applyNoSupply(val, true);
+  try {
+    const res = await api({ action: 'setNoSupply', courseCode: course.courseCode, value: val });
+    const alertEl = document.getElementById('noSupplyAlert');
+    if (res.ok) {
+      course.noSupply = val;
+      alertEl.className = 'alert alert-ok';
+      alertEl.textContent = val ? '해당없음으로 설정되었습니다.' : '준비물 신청 모드로 변경되었습니다.';
+      alertEl.classList.remove('hidden');
+      setTimeout(() => alertEl.classList.add('hidden'), 2500);
+    }
+  } catch(e) {}
+}
+
+function applyNoSupply(isNo, animate) {
+  if (isNo) {
+    hide('addFormSec'); hide('supplyListSec');
+  } else {
+    show('addFormSec'); show('supplyListSec');
+    if (animate && document.querySelectorAll('#itemsContainer .item-card').length === 0) addItem();
+  }
+}
+
+// ── 배송지 저장 ─────────────────────────────────────
+async function saveDelivery() {
+  const fields = ['dAddress','dBuilding','dRecipient','dPhone'];
+  let ok = true;
+  fields.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el.value.trim()) { el.classList.add('err'); ok = false; }
+    else el.classList.remove('err');
+  });
+  if (!ok) { document.getElementById('deliveryMsg').textContent = '필수 항목을 입력해주세요.'; document.getElementById('deliveryMsg').style.color = '#dc2626'; return; }
+
+  showOverlay('배송지 저장 중...', '입력하신 배송지 정보를 저장합니다.');
+  const res = await api({
+    action: 'submitDelivery', courseCode: course.courseCode,
+    address:   document.getElementById('dAddress').value.trim(),
+    building:  document.getElementById('dBuilding').value.trim(),
+    recipient: document.getElementById('dRecipient').value.trim(),
+    phone:     document.getElementById('dPhone').value.trim(),
+    memo:      document.getElementById('dMemo').value.trim(),
+  });
+  hideOverlay();
+  const msg = document.getElementById('deliveryMsg');
+  if (res.ok) { msg.textContent = '✓ ' + res.msg; msg.style.color = '#16a34a'; }
+  else { msg.textContent = res.msg; msg.style.color = '#dc2626'; }
+}
+
+// ── 품목 입력 폼 ────────────────────────────────────
+function addItem() {
+  itemCount++;
+  const id = 'itm_' + itemCount;
+  const div = document.createElement('div');
+  div.className = 'item-card'; div.id = id;
+  div.innerHTML = `
+    <div class="i-num">#${itemCount}</div>
+    <button class="i-del" onclick="removeItem('${id}')">×</button>
+
+    <div class="type-toggle">
+      <button class="type-btn active-shop" data-type="쇼핑몰" onclick="setType(this,'${id}')">🛒 인터넷 쇼핑몰</button>
+      <button class="type-btn" data-type="견적서" onclick="setType(this,'${id}')">📄 견적서 첨부</button>
+    </div>
+
+    <div class="form-group">
+      <label>품명 <span class="req">*</span></label>
+      <input type="text" placeholder="예: A4 용지" data-field="itemName">
+    </div>
+
+    <div class="price-row">
+      <div class="form-group">
+        <label>수량 <span class="req">*</span></label>
+        <input type="number" placeholder="1" min="1" data-field="qty">
+      </div>
+      <div class="form-group">
+        <label>단가 (원)</label>
+        <input type="number" placeholder="0" min="0" data-field="unitPrice">
+      </div>
+      <div class="form-group" id="${id}_shipWrap">
+        <label>쇼핑몰 배송비 (원) <span class="req">*</span></label>
+        <input type="number" placeholder="0" min="0" data-field="shipping" value="0">
+        <div class="ship-note">없으면 0을 입력해주세요</div>
+      </div>
+    </div>
+
+    <div id="${id}_shopZone">
+      <div class="form-group">
+        <label>쇼핑몰 링크 <span class="req">*</span></label>
+        <input type="url" placeholder="https://..." data-field="link" oninput="chkLink(this)">
+        <div class="link-check"></div>
+      </div>
+    </div>
+
+    <div id="${id}_estZone" class="hidden">
+      <label style="font-size:12px;font-weight:500;color:var(--sub);display:block;margin-bottom:4px">견적서 이미지 첨부 <span class="req">*</span></label>
+      <div class="est-zone" onclick="document.getElementById('${id}_file').click()">
+        <input type="file" id="${id}_file" accept="image/*,.pdf" onchange="previewEstNew(this,'${id}')">
+        <div id="${id}_estPlaceholder">클릭하여 파일 선택 (이미지 또는 PDF)</div>
+        <img id="${id}_estPreview" class="est-preview hidden">
+        <div id="${id}_estName" class="est-name"></div>
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-top:10px">
+      <label>비고</label>
+      <input type="text" placeholder="색상, 상품선택사항 등 세부사항 기재" data-field="note">
+    </div>
+  `;
+  document.getElementById('itemsContainer').appendChild(div);
+}
+
+function removeItem(id) { document.getElementById(id)?.remove(); }
+
+function setType(btn, cardId) {
+  const card = document.getElementById(cardId);
+  card.querySelectorAll('.type-btn').forEach(b => b.className = 'type-btn');
+  const type = btn.dataset.type;
+  btn.className = 'type-btn ' + (type === '쇼핑몰' ? 'active-shop' : 'active-est');
+  document.getElementById(cardId + '_shopZone').classList.toggle('hidden', type !== '쇼핑몰');
+  document.getElementById(cardId + '_estZone').classList.toggle('hidden', type !== '견적서');
+  document.getElementById(cardId + '_shipWrap').classList.toggle('hidden', type !== '쇼핑몰');
+}
+
+function previewEstNew(input, cardId) {
+  const file = input.files[0];
+  if (!file) return;
+  const nameEl = document.getElementById(cardId + '_estName');
+  const placeholderEl = document.getElementById(cardId + '_estPlaceholder');
+  if (nameEl) nameEl.textContent = '✓ ' + file.name;
+  if (placeholderEl) placeholderEl.textContent = '파일 선택됨 (클릭하여 변경)';
+  if (file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = document.getElementById(cardId + '_estPreview');
+      if (img) { img.src = e.target.result; img.classList.remove('hidden'); }
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+let lcTimers = {};
+function chkLink(input) {
+  const check = input.closest('.form-group').querySelector('.link-check');
+  const url = input.value.trim();
+  if (!url) { check.textContent = ''; return; }
+  check.textContent = '확인 중...'; check.className = 'link-check';
+  clearTimeout(lcTimers[input.dataset.field]);
+  lcTimers[input.dataset.field + Date.now()] = setTimeout(() => {
+    try {
+      new URL(url);
+      if (url.startsWith('http')) {
+        check.textContent = '✓ 링크 형식 확인됨'; check.className = 'link-check lc-ok';
+      } else { check.textContent = '⚠ https://로 시작해야 합니다'; check.className = 'link-check lc-err'; }
+    } catch { check.textContent = '✗ 올바른 URL이 아닙니다'; check.className = 'link-check lc-err'; }
+  }, 500);
+}
+
+// ── 제출 ───────────────────────────────────────────
+async function submitAll() {
+  // 승인 항목이 있으면 제출 차단
+  if (supplies.some(s => s.status === '승인')) {
+    showAddAlert('승인된 항목이 있어 제출이 제한됩니다. 충남교육청 중등교육과(041-640-7221)로 문의해주세요.', 'err');
+    return;
+  }
+  const cards = document.querySelectorAll('#itemsContainer .item-card');
+  if (!cards.length) { showAddAlert('추가할 품목을 입력해주세요.', 'err'); return; }
+
+  const items = []; let hasErr = false;
+
+  for (const card of cards) {
+    const g = f => card.querySelector(`[data-field="${f}"]`);
+    const v = f => g(f).value.trim();
+    const activeType = card.querySelector('.type-btn.active-shop') ? '쇼핑몰' : '견적서';
+
+    if (!v('itemName')) { g('itemName').classList.add('err'); hasErr = true; }
+    if (!v('qty') || Number(v('qty')) < 1) { g('qty').classList.add('err'); hasErr = true; }
+
+    if (activeType === '쇼핑몰') {
+      const link = v('link');
+      if (!link) { g('link').classList.add('err'); hasErr = true; }
+      else {
+        try { new URL(link); } catch { g('link').classList.add('err'); hasErr = true; }
+      }
+    }
+
+    if (hasErr) continue;
+
+    items.push({
+      itemName: v('itemName'), qty: Number(v('qty')),
+      unitPrice: Number(v('unitPrice')) || 0, shipping: Number(v('shipping')) || 0,
+      purchaseType: activeType, link: v('link'), note: v('note'),
+      _card: card,
+    });
+  }
+
+  if (hasErr) { showAddAlert('입력값을 확인해주세요. 빨간 테두리 항목이 필수입니다.', 'err'); return; }
+
+  // 예산 초과 차단
+  const newTotal = items.reduce((s, i) => s + i.qty * i.unitPrice + i.shipping, 0);
+  const exTotal  = supplies.reduce((s, r) => s + (Number(r.subTotal)||0) + (Number(r.shipping)||0), 0);
+  const budget   = Number(course.budget) || 0;
+
+  if (budget > 0 && exTotal + newTotal > budget) {
+    alert(
+      `예산을 초과하여 제출할 수 없습니다.\n\n` +
+      `가용 예산: ${fmt(budget)}원\n` +
+      `기존 신청: ${fmt(exTotal)}원\n` +
+      `신규 입력: ${fmt(newTotal)}원\n` +
+      `합계: ${fmt(exTotal + newTotal)}원 (${fmt(exTotal + newTotal - budget)}원 초과)\n\n` +
+      `품목 금액 또는 배송비를 조정하신 후 다시 시도해주세요.\n\n` +
+      `문의: 충남교육청 중등교육과  ☎ 041-640-7221`
+    );
+    return;
+  }
+
+  showOverlay('준비물 제출 중...', '입력하신 품목을 저장합니다.');
+  document.getElementById('addAlert').innerHTML = '';
+
+  try {
+    const payload = items.map(i => ({
+      itemName: i.itemName, qty: i.qty, unitPrice: i.unitPrice,
+      shipping: i.shipping, purchaseType: i.purchaseType, link: i.link, note: i.note,
+    }));
+    const res = await api({ action: 'submitSupply', courseCode: course.courseCode, items: payload });
+    if (!res.ok) { showAddAlert(res.msg, 'err'); return; }
+
+    const rowIds    = res.rowIds    || [];
+    const rowNums   = res.rowNums   || {};
+    const urlColIdx = res.urlColIdx || 0;
+
+    // ── 제출된 품목을 클라이언트 supplies 배열에 먼저 추가 ──
+    const now = new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
+    const newSupplies = items.map((item, idx) => ({
+      rowId:        rowIds[idx],
+      itemName:     item.itemName,
+      qty:          item.qty,
+      unitPrice:    item.unitPrice,
+      subTotal:     item.qty * item.unitPrice,
+      shipping:     item.shipping,
+      totalPrice:   item.qty * item.unitPrice + item.shipping,
+      purchaseType: item.purchaseType,
+      link:         item.link || '',
+      estimateUrl:  '',   // 업로드 후 채워짐
+      note:         item.note || '',
+      status:       '검토전',
+      submittedAt:  now,
+    }));
+    supplies = [...supplies, ...newSupplies];
+
+    // ── 견적서 업로드 → 성공 시 클라이언트 배열에 URL 직접 기록 ──
+    const estItems = items.filter((item, idx) =>
+      item.purchaseType === '견적서' && item._card.querySelector('input[type=file]')?.files[0]
+    );
+    if (estItems.length > 0) {
+      updateOverlay('견적서 이미지 업로드 중...', `견적서 ${estItems.length}개를 Drive에 저장합니다.\n파일 크기에 따라 시간이 걸릴 수 있습니다.`);
+    }
+    for (let idx = 0; idx < items.length; idx++) {
+      const item = items[idx];
+      if (item.purchaseType !== '견적서') continue;
+      const fileInput = item._card.querySelector('input[type=file]');
+      if (!fileInput || !fileInput.files[0]) continue;
+      try {
+        const url = await uploadEstimate(rowIds[idx], fileInput.files[0], rowNums[rowIds[idx]], urlColIdx);
+        // 클라이언트 supplies 배열에 URL 바로 반영
+        const target = supplies.find(s => s.rowId === rowIds[idx]);
+        if (target && url) target.estimateUrl = url;
+      } catch(uploadErr) {
+        console.error('견적서 업로드 실패:', uploadErr);
+      }
+    }
+
+    // ── 화면 갱신 (서버 재조회 없이 클라이언트 데이터로 바로 렌더) ──
+    document.getElementById('itemsContainer').innerHTML = '';
+    itemCount = 0; addItem();
+    renderSupplyList(); renderBudget();
+    showAddAlert(`${items.length}개 품목이 제출되었습니다.`, 'ok');
+    document.getElementById('supplyListSec').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch(e) { showAddAlert('제출 실패. 다시 시도해주세요.', 'err'); }
+  finally { hideOverlay(); }
+}
+
+async function uploadEstimate(rowId, file, rowNum, urlColIdx) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = async e => {
+      const base64 = e.target.result.split(',')[1];
+      try {
+        const res = await api({
+          action: 'uploadEstimate',
+          courseCode: course.courseCode,
+          rowId, rowNum, urlColIdx,
+          fileName: file.name,
+          base64Data: base64,
+          mimeType: file.type,
+        });
+        if (res && res.ok) resolve(res.url);
+        else reject(new Error(res?.msg || '업로드 실패'));
+      } catch(e) { reject(e); }
+    };
+    reader.onerror = () => reject(new Error('파일 읽기 실패'));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function delItem(rowId) {
+  if (!confirm('이 품목을 삭제하시겠습니까?')) return;
+  const res = await api({ action: 'deleteSupply', rowId });
+  if (res.ok) {
+    supplies = supplies.filter(s => s.rowId !== rowId);
+    renderSupplyList(); renderBudget();
+  } else alert(res.msg);
+}
+
+function resetForm() {
+  document.getElementById('itemsContainer').innerHTML = '';
+  itemCount = 0; addItem();
+}
+
+function showAddAlert(msg, type) {
+  document.getElementById('addAlert').innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+}
+
+// ── 유틸 ───────────────────────────────────────────
+function showOverlay(title, sub) {
+  document.getElementById('ovTitle').textContent = title;
+  document.getElementById('ovSub').textContent = sub || 'Google 서버와 통신 중입니다.\n잠시만 기다려주세요.';
+  document.getElementById('overlay').classList.remove('hidden');
+}
+function updateOverlay(title, sub) {
+  document.getElementById('ovTitle').textContent = title;
+  if (sub) document.getElementById('ovSub').textContent = sub;
+}
+function hideOverlay() {
+  document.getElementById('overlay').classList.add('hidden');
+}
+async function api(payload) {
+  const res = await fetch(SCRIPT_URL, {
+    method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(payload),
+  });
+  return res.json();
+}
+function fmt(n) { return Number(n||0).toLocaleString('ko-KR'); }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function show(id) { const e = document.getElementById(id); if(e) e.classList.remove('hidden'); if(e && e.style.display==='none') e.style.display=''; }
+function hide(id) { const e = document.getElementById(id); if(e) e.classList.add('hidden'); }
+</script>
+</body>
+</html>
