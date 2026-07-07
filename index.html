@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>꿈키움 준비물 신청 - 기한 종료</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f5fb;--card:#fff;--accent:#1a56db;--accent-l:#eef2ff;
+  --err:#b91c1c;--err-bg:#fee2e2;--text:#1e1e2e;--sub:#6b7280;
+  --border:#e5e7eb;--r:10px;--sh:0 1px 4px rgba(0,0,0,.08)
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+.header{background:var(--err);color:#fff;padding:18px 24px}
+.header-inner{max-width:780px;margin:0 auto}
+.header h1{font-size:17px;font-weight:700}
+.header p{font-size:12px;opacity:.9;margin-top:3px}
+.wrap{max-width:780px;margin:auto;padding:22px 14px 80px;width:100%}
+
+/* 안내 카드 */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:40px 24px;text-align:center;box-shadow:var(--sh)}
+.icon-box{font-size:48px;margin-bottom:20px}
+.status-title{font-size:20px;font-weight:700;color:var(--err);margin-bottom:12px}
+.status-desc{font-size:15px;line-height:1.6;color:var(--text);margin-bottom:30px}
+
+/* 문의처 박스 */
+.contact-box{background:var(--bg);border-radius:12px;padding:20px;display:inline-block;width:100%;max-width:400px}
+.contact-lbl{font-size:12px;color:var(--sub);margin-bottom:6px;font-weight:500}
+.contact-val{font-size:16px;font-weight:700;color:var(--text);display:flex;flex-direction:column;gap:4px}
+.tel-link{color:var(--accent);text-decoration:none;font-size:18px}
+
+.btn-home{margin-top:30px;display:inline-block;padding:12px 24px;background:var(--accent);color:#fff;text-decoration:none;border-radius:8px;font-size:14px;font-weight:500}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <h1>꿈키움 준비물 신청 시스템</h1>
+    <p>2026학년도 1학기 · 신청 기간 종료</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="card">
+    <div class="icon-box">⏰</div>
+    <h2 class="status-title">준비물 신청 기한이 경과되었습니다</h2>
+    <p class="status-desc">
+      2026학년도 1학기 꿈키움 프로그램 준비물 신청이 마감되었습니다.<br>
+      현재는 추가 신청 및 수정이 불가능합니다.
+    </p>
+
+    <div class="contact-box">
+      <div class="contact-lbl">관련 문의사항</div>
+      <div class="contact-val">
+        <span>충남교육청 중등교육과</span>
+        <a href="tel:041-640-7221" class="tel-link">041-640-7221</a>
+      </div>
+    </div>
+
+    <div>
+        <a href="#" class="btn-home" onclick="location.reload();">메인으로 돌아가기</a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
