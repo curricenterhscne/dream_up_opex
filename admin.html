@@ -839,18 +839,15 @@ function driveImgUrl(url) {
   return url;
 }
 
-// 강좌별 신청서 미리보기 (첨부 이미지와 동일한 양식)
-function previewSheet() {
-  const code = document.getElementById('exportCourseSelect').value;
-  if (!code) { alert('강좌를 선택해주세요.'); return; }
-  const c = allCourses.find(x => String(x.courseCode).toUpperCase() === code.toUpperCase());
-  if (!c) return;
+  }
+ 
+  // ── 이하 기존 코드 그대로 ──────────────────────────────
   const d = c.delivery || {};
-
+ 
   let supplyRows = '';
   let totalAmt = 0;
   const hasEstimate = (c.supplies || []).some(s => s.purchaseType === '견적서');
-
+ 
   if (c.noSupply) {
     supplyRows = `<tr><td class="left" colspan="6">해당없음 (준비물 없음)</td></tr>`;
   } else if (!c.supplies || !c.supplies.length) {
@@ -876,7 +873,7 @@ function previewSheet() {
         </tr>`;
     });
   }
-
+ 
   const estimateImgs = (c.supplies || []).filter(s => s.purchaseType === '견적서' && s.estimateUrl)
     .map(s => {
       const imgUrl = driveImgUrl(s.estimateUrl);
@@ -892,7 +889,7 @@ function previewSheet() {
           </div>
         </div>`;
     }).join('');
-
+ 
   document.getElementById('sheetPreview').innerHTML = `
     <div class="vendor-sheet" id="printArea">
       <div class="vs-title">대학연계 참학력 공동교육과정 수업운영비 신청서(${YEAR}학년도 ${TERM})</div>
@@ -906,7 +903,7 @@ function previewSheet() {
           <td class="lbl-cell">수령인명</td><td>${esc(d.recipient||'')} (${esc(d.phone||'')})</td>
         </tr>
       </table>
-
+ 
       <table class="vs-table">
         <thead>
           <tr>
@@ -917,7 +914,7 @@ function previewSheet() {
         <tbody>${supplyRows}</tbody>
       </table>
       ${!c.noSupply && c.supplies && c.supplies.length ? `<div class="vs-total">총합계: ${fmt(totalAmt)}원</div>` : ''}
-
+ 
       ${estimateImgs ? `<div class="vs-est">견적서(이미지 첨부)</div>${estimateImgs}` : ''}
     </div>
   `;
