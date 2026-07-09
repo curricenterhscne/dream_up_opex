@@ -134,12 +134,12 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 .btn-ghost{background:transparent;color:var(--accent);border:1.5px solid var(--accent)}.btn-ghost:hover{background:var(--al)}
 .btn-ok{background:#16a34a;color:#fff}.btn-ok:hover{background:#15803d}
 
-/* 내보내기 / 용역업체 양식 */
+/* 내보내기 */
 .export-section h3{font-size:13px;font-weight:700;margin-bottom:6px}
 .export-section p{font-size:12px;color:var(--sub);margin-bottom:12px}
 .btn-row{display:flex;gap:8px;flex-wrap:wrap}
 
-/* 용역업체 양식 미리보기 (인쇄용) */
+/* 용역업체 양식 미리보기 */
 .vendor-sheet{font-family:'Noto Sans KR',sans-serif;max-width:700px;margin:0 auto;padding:20px;background:#fff}
 .vs-title{text-align:center;font-size:16px;font-weight:700;margin-bottom:12px}
 .vs-info-table{width:100%;border-collapse:collapse;margin-bottom:14px;font-size:12px}
@@ -164,7 +164,6 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 .spin{display:inline-block;width:26px;height:26px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* 전체화면 로딩 오버레이 */
 .overlay{position:fixed;inset:0;background:rgba(255,255,255,.88);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;backdrop-filter:blur(2px)}
 .overlay.hidden{display:none!important}
 .overlay .spin-lg{width:40px;height:40px;border:4px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
@@ -176,20 +175,20 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 .tr{text-align:right}
 .tsm{font-size:11px;color:var(--sub)}
 .divider{border:none;border-top:1px solid var(--border);margin:12px 0}
+
 @media print{
-  .sidebar, .filter-bar, .btn, .nav-item, .ph,
-  .export-section, #courseSheetSec > h3,
-  #courseSheetSec > p, #courseSheetSec > .btn-row,
-  .card > .sec-title, .card > p { display:none!important }
-  .main { padding:0 }
-  #pageExport .card { box-shadow:none; border:none; padding:0 }
-  #sheetPreview { display:block!important }
+  .sidebar,.filter-bar,.btn,.nav-item,.ph,
+  .export-section,#courseSheetSec > h3,
+  #courseSheetSec > p,#courseSheetSec > .btn-row,
+  .card > .sec-title,.card > p{display:none!important}
+  .main{padding:0}
+  #pageExport .card{box-shadow:none;border:none;padding:0}
+  #sheetPreview{display:block!important}
 }
 </style>
 </head>
 <body>
 
-<!-- 전체화면 로딩 오버레이 -->
 <div class="overlay hidden" id="overlay">
   <div class="spin-lg"></div>
   <div class="ov-title" id="ovTitle">처리 중...</div>
@@ -198,11 +197,11 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
   <div class="ov-note">※ Google Sheets 연동으로 인해 10~20초 소요될 수 있습니다</div>
 </div>
 
-<!-- ── 로그인 ────────────────────────────────────── -->
+<!-- 로그인 -->
 <div class="login-screen" id="loginScreen">
   <div class="login-box">
     <h1>꿈키움 준비물 관리</h1>
-    <p>2026학년도 1학기 · 담당자용</p>
+    <p id="loginSubTitle">2026학년도 여름방학 · 담당자용</p>
     <div class="tab-row">
       <div class="tab on" id="tab-univ" onclick="switchTab('univ')">대학 담당자</div>
       <div class="tab" id="tab-admin" onclick="switchTab('admin')">교육청 관리자</div>
@@ -222,11 +221,12 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
   </div>
 </div>
 
-<!-- ── 앱 ─────────────────────────────────────────── -->
+<!-- 앱 -->
 <div class="app" id="app">
   <div class="sidebar">
     <div class="logo">
-      <h1>꿈키움 준비물</h1><p>2026학년도 1학기</p>
+      <h1>꿈키움 준비물</h1>
+      <p id="sidebarTerm">2026학년도 여름방학</p>
       <span class="role-badge" id="roleBadge">대학 담당자</span>
     </div>
     <nav>
@@ -310,23 +310,19 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzmFVDbxa_c36eQqOf_W
 let role = 'univ', loginCode = '', allCourses = [];
 let YEAR = '2026', TERM = '여름방학';
 
+// ── 설정 로드 ────────────────────────────────────────
 async function loadSettings() {
   try {
     const res = await api({ action: 'getSettings' });
     if (res.ok) { YEAR = res.year; TERM = res.term; }
   } catch(e) {}
   const label = `${YEAR}학년도 ${TERM}`;
-  // 로그인 화면 부제목
-  const loginSub = document.querySelector('.login-box p');
-  if (loginSub) loginSub.textContent = label + ' · 담당자용';
-  // 사이드바
-  const sidebarSub = document.querySelector('.sidebar .logo p');
-  if (sidebarSub) sidebarSub.textContent = label;
+  document.getElementById('loginSubTitle').textContent = label + ' · 담당자용';
+  document.getElementById('sidebarTerm').textContent = label;
 }
-
 window.addEventListener('DOMContentLoaded', loadSettings);
 
-// ── 로그인 ──────────────────────────────────────────
+// ── 로그인 ───────────────────────────────────────────
 function switchTab(t) {
   role = t;
   ['univ','admin','vendor'].forEach(r => {
@@ -374,6 +370,7 @@ async function login() {
     univs.forEach(u => { const o = document.createElement('option'); o.value = u; o.textContent = u; sel.appendChild(o); });
   }
 
+  // 내보내기 드롭다운 채우기
   const expSel = document.getElementById('exportCourseSelect');
   allCourses
     .filter(c => !c.noSupply && c.status !== '폐강')
@@ -391,7 +388,7 @@ async function login() {
   goPage('dash');
 }
 
-// ── 페이지 전환 ─────────────────────────────────────
+// ── 페이지 전환 ──────────────────────────────────────
 function goPage(page) {
   ['dash','courses','export'].forEach(p => {
     document.getElementById('page' + cap(p)).classList.add('hidden');
@@ -404,7 +401,7 @@ function goPage(page) {
 }
 function cap(s) { return s[0].toUpperCase() + s.slice(1); }
 
-// ── 대시보드 ────────────────────────────────────────
+// ── 대시보드 ─────────────────────────────────────────
 function renderDash() {
   const viewCourses = role === 'vendor' ? allCourses.filter(c => !c.noSupply) : allCourses;
   const total     = viewCourses.length;
@@ -444,10 +441,10 @@ function renderDash() {
         </div>`).join('');
 }
 
-// ── 강좌 목록 ───────────────────────────────────────
+// ── 강좌 목록 ────────────────────────────────────────
 function renderList() {
-  const q = document.getElementById('fText').value.toLowerCase();
-  const univ = document.getElementById('fUniv').value;
+  const q      = document.getElementById('fText').value.toLowerCase();
+  const univ   = document.getElementById('fUniv').value;
   const status = document.getElementById('fStatus').value;
   const supply = document.getElementById('fSupply').value;
 
@@ -465,7 +462,10 @@ function renderList() {
   });
 
   const list = document.getElementById('courseList');
-  if (!filtered.length) { list.innerHTML = '<p class="tsm" style="text-align:center;padding:28px;color:#9ca3af">조건에 맞는 강좌가 없습니다.</p>'; return; }
+  if (!filtered.length) {
+    list.innerHTML = '<p class="tsm" style="text-align:center;padding:28px;color:#9ca3af">조건에 맞는 강좌가 없습니다.</p>';
+    return;
+  }
   list.innerHTML = filtered.map(c => buildCard(c)).join('');
 }
 
@@ -475,67 +475,6 @@ function buildCard(c) {
   const noDel  = !c.noSupply && c.status !== '폐강' && !c.hasDelivery;
   const statusCls = { '개설예정':'b-pending', '개설확정':'b-open', '폐강':'b-closed' };
 
-  // 배송지 블록
-  const deliveryBlock = c.noSupply ? '' : (c.delivery
-    ? `<div class="delivery-info">
-        <div style="font-size:11px;font-weight:700;color:var(--ok);margin-bottom:5px">📦 배송지 정보</div>
-        <div class="di-row"><span class="di-l">주소</span><span>${esc(c.delivery.address)} ${esc(c.delivery.building)}</span></div>
-        <div class="di-row"><span class="di-l">수령인</span><span>${esc(c.delivery.recipient)} · ${esc(c.delivery.phone)}</span></div>
-        ${c.delivery.memo ? `<div class="di-row"><span class="di-l">메모</span><span>${esc(c.delivery.memo)}</span></div>` : ''}
-      </div>`
-    : `<div class="delivery-missing">⚠ 배송지 정보가 입력되지 않았습니다. 강사에게 입력을 요청해주세요.</div>`);
-
-  // 준비물 테이블
-  const supplyBlock = c.noSupply
-    ? `<div class="alert alert-info" style="margin:0">이 강좌는 준비물이 없습니다 (해당없음)</div>`
-    : (c.supplies && c.supplies.length
-        ? `<div style="overflow-x:auto">
-            <table class="st">
-              <thead><tr>
-                <th>품명/비고</th><th>수량</th><th>단가</th><th>소계</th><th>배송비</th><th>합계</th><th>구매방식</th><th>링크/견적서</th>
-                ${role === 'admin' ? '<th>검토상태</th><th></th>' : '<th>상태</th>'}
-              </tr></thead>
-              <tbody>
-                ${c.supplies.map(s => `
-                  <tr>
-                    <td><b>${esc(s.itemName)}</b>${s.note?`<br><span class="tsm">${esc(s.note)}</span>`:''}</td>
-                    <td class="tr">${s.qty}</td>
-                    <td class="tr">${fmt(s.unitPrice)}</td>
-                    <td class="tr">${fmt(s.subTotal)}</td>
-                    <td class="tr">${fmt(s.shipping)}</td>
-                    <td class="tr"><b>${fmt((Number(s.subTotal)||0)+(Number(s.shipping)||0))}</b></td>
-                    <td><span class="badge ${s.purchaseType==='견적서'?'b-warn':'b-gray'}">${esc(s.purchaseType||'쇼핑몰')}</span></td>
-                    <td>${s.purchaseType==='견적서'
-                      ? (s.estimateUrl?`<a class="est-btn" href="${esc(s.estimateUrl)}" target="_blank">📄 견적서</a>`:'<span class="tsm">미첨부</span>')
-                      : (s.link?`<a class="link-btn" href="${esc(s.link)}" target="_blank">🔗 링크</a>`:'<span class="tsm">없음</span>')}</td>
-                    ${role==='admin'
-                      ? `<td>
-                           <select class="st-sel" id="sel_${s.rowId}"
-                             data-original="${s.status}"
-                             onchange="markChanged(this,'${c.courseCode}')">
-                             ${['검토전','승인','반려','수정요청'].map(v=>`<option ${v===s.status?'selected':''}>${v}</option>`).join('')}
-                           </select>
-                         </td>
-                         <td><button class="btn btn-err btn-sm" onclick="admDel('${s.rowId}','${c.courseCode}')">삭제</button></td>`
-                      : `<td><span class="badge ${s.status==='승인'?'b-ok':s.status==='검토전'?'b-pending':'b-err'}">${esc(s.status)}</span></td>`}
-                  </tr>`).join('')}
-              </tbody>
-            </table></div>
-            <div class="tr" style="margin-top:8px;font-size:13px;font-weight:700">
-              합계: ${fmt(c.totalCost)}원
-              ${budget>0?` / 예산: ${fmt(budget)}원 → <span style="color:${over?'var(--err)':'var(--ok)'}">잔여 ${fmt(budget-c.totalCost)}원</span>`:''}
-            </div>
-            ${role==='admin' ? `
-            <div class="review-save-bar hidden" id="rsbar_${c.courseCode}">
-              <span class="hint">⚠ 저장되지 않은 변경사항이 있습니다</span>
-              <div style="display:flex;gap:8px">
-                <button class="btn btn-ghost btn-sm" onclick="cancelReview('${c.courseCode}')">되돌리기</button>
-                <button class="btn btn-ok btn-sm" onclick="saveReview('${c.courseCode}')">검토 결과 저장</button>
-              </div>
-            </div>` : ''}`
-        : `<p class="tsm" style="text-align:center;padding:14px;color:#9ca3af">신청된 준비물이 없습니다.</p>`);
-
-  // 관리자 전용 컨트롤 (수강인원·피드백)
   const adminCtrl = role === 'admin' ? `
     <hr class="divider">
     <div class="stud-edit">
@@ -581,7 +520,6 @@ function buildCard(c) {
         <span class="chevron">▾</span>
       </div>
       <div class="cc-detail" id="det_${c.courseCode}">
-        <!-- 카드 열 때 lazy load -->
         <div id="det_inner_${c.courseCode}">
           <div style="text-align:center;padding:20px;color:var(--sub);font-size:13px">
             <div class="spin" style="display:inline-block;margin-bottom:6px"></div><br>상세 정보 불러오는 중...
@@ -592,10 +530,10 @@ function buildCard(c) {
     </div>`;
 }
 
-// ── 카드 열기 + 상세 lazy load ──────────────────────
+// ── 카드 열기 + 상세 lazy load ───────────────────────
 function toggleCard(code) {
-  const card = document.getElementById('cc_' + code);
-  const det  = document.getElementById('det_' + code);
+  const card  = document.getElementById('cc_' + code);
+  const det   = document.getElementById('det_' + code);
   const isOpen = card.classList.contains('exp');
 
   if (isOpen) {
@@ -615,8 +553,6 @@ function toggleCard(code) {
 
   card.classList.toggle('exp', !isOpen);
   det.classList.toggle('open', !isOpen);
-
-  // 열 때만 상세 로드 (이미 로드된 경우 스킵)
   if (!isOpen) loadCardDetail(code);
 }
 
@@ -625,18 +561,17 @@ async function loadCardDetail(code) {
   if (!inner || inner.dataset.loaded === '1') return;
 
   try {
-    const key = role === 'admin' ? { adminKey: loginCode }
+    const key = role === 'admin'  ? { adminKey:  loginCode }
               : role === 'vendor' ? { vendorKey: loginCode }
               : { univCode: loginCode };
     const res = await api({ action: 'getCourseDetail', courseCode: code, ...key });
     if (!res.ok) { inner.innerHTML = `<div class="alert alert-err">${res.msg}</div>`; return; }
 
-    // allCourses 캐시 업데이트
     const c = allCourses.find(x => x.courseCode.toUpperCase() === code.toUpperCase());
     if (c) {
-      c.supplies   = res.supplies || [];
-      c.delivery   = res.delivery || null;
-      c.totalCost  = res.totalCost || 0;
+      c.supplies    = res.supplies || [];
+      c.delivery    = res.delivery || null;
+      c.totalCost   = res.totalCost || 0;
       c.hasDelivery = !!res.delivery;
     }
 
@@ -706,24 +641,19 @@ function buildDetailBlock(c, res) {
             </div>` : ''}`
         : `<p class="tsm" style="text-align:center;padding:14px;color:#9ca3af">신청된 준비물이 없습니다.</p>`);
 
-  return deliveryBlock + `<div style="font-size:12px;font-weight:700;margin-bottom:8px">준비물 (${supplies.length}개)</div>` + supplyBlock;
+  return deliveryBlock
+    + `<div style="font-size:12px;font-weight:700;margin-bottom:8px">준비물 (${supplies.length}개)</div>`
+    + supplyBlock;
 }
 
-// ── 관리자 액션 ─────────────────────────────────────
-
-// 드롭다운 변경 시 — 즉시 저장 않고 변경 표시만
+// ── 관리자 액션 ──────────────────────────────────────
 function markChanged(sel, courseCode) {
-  const original = sel.dataset.original;
-  const changed = sel.value !== original;
-  sel.classList.toggle('changed', changed);
-  // 이 강좌 카드 안에 변경된 드롭다운이 하나라도 있으면 저장 바 표시
+  sel.classList.toggle('changed', sel.value !== sel.dataset.original);
   const bar = document.getElementById('rsbar_' + courseCode);
   if (!bar) return;
-  const anyChanged = document.querySelectorAll(`#det_${courseCode} .st-sel.changed`).length > 0;
-  bar.classList.toggle('hidden', !anyChanged);
+  bar.classList.toggle('hidden', document.querySelectorAll(`#det_${courseCode} .st-sel.changed`).length === 0);
 }
 
-// 되돌리기 — 모든 드롭다운을 original 값으로 복원
 function cancelReview(courseCode) {
   document.querySelectorAll(`#det_${courseCode} .st-sel`).forEach(sel => {
     sel.value = sel.dataset.original;
@@ -732,11 +662,9 @@ function cancelReview(courseCode) {
   document.getElementById('rsbar_' + courseCode)?.classList.add('hidden');
 }
 
-// 검토 결과 일괄 저장
 async function saveReview(courseCode) {
   const sels = document.querySelectorAll(`#det_${courseCode} .st-sel.changed`);
   if (!sels.length) return;
-
   showOverlay('검토 결과 저장 중...', `${sels.length}개 항목의 검토 상태를 저장합니다.`);
   try {
     for (const sel of sels) {
@@ -746,7 +674,6 @@ async function saveReview(courseCode) {
       sel.classList.remove('changed');
     }
     document.getElementById('rsbar_' + courseCode)?.classList.add('hidden');
-    // 로컬 데이터도 갱신
     await refresh();
     renderList();
     renderDash();
@@ -768,7 +695,7 @@ async function admDel(rowId, courseCode) {
 
 async function updCourse(code) {
   const students = Number(document.getElementById('st_' + code).value) || 0;
-  const status = document.getElementById('ss_' + code).value;
+  const status   = document.getElementById('ss_' + code).value;
   showOverlay('강좌 정보 저장 중...', '수강인원과 상태를 업데이트합니다.');
   const res = await api({ action: 'updateCourseStatus', courseCode: code, status, students, adminKey: loginCode });
   if (res.ok) { await refresh(); hideOverlay(); renderList(); renderDash(); alert(`저장 완료. 가용예산: ${fmt(students * 30000)}원`); }
@@ -781,30 +708,29 @@ async function sendFb(code) {
   showOverlay('피드백 발송 중...', '강사 및 대학 담당자에게 이메일을 발송합니다.');
   const res = await api({ action: 'sendFeedback', courseCode: code, message: msg, adminKey: loginCode });
   hideOverlay();
-  if (res.ok) { document.getElementById('fb_' + code).value = ''; alert('피드백 발송 완료\n대학 담당자에게 이메일이 발송되었습니다.\n(이메일 본문에 강사 연락처가 포함됩니다)'); }
+  if (res.ok) { document.getElementById('fb_' + code).value = ''; alert('피드백 발송 완료\n대학 담당자에게 이메일이 발송되었습니다.'); }
   else alert(res.msg);
 }
 
 async function refresh() {
   showOverlay('데이터 새로고침 중...', '최신 신청 현황을 불러옵니다.');
   let res;
-  if (role === 'univ')        res = await api({ action: 'getUnivCoursesLight',   univCode:  loginCode });
-  else if (role === 'admin')  res = await api({ action: 'getAllCoursesLight',    adminKey:  loginCode });
-  else                        res = await api({ action: 'getVendorCoursesLight', vendorKey: loginCode });
+  if (role === 'univ')       res = await api({ action: 'getUnivCoursesLight',   univCode:  loginCode });
+  else if (role === 'admin') res = await api({ action: 'getAllCoursesLight',    adminKey:  loginCode });
+  else                       res = await api({ action: 'getVendorCoursesLight', vendorKey: loginCode });
   if (res.ok) {
     allCourses = res.courses;
-    // 열려 있던 카드의 loaded 플래그 초기화 → 다음 열 때 재로드
     document.querySelectorAll('[id^="det_inner_"]').forEach(el => delete el.dataset.loaded);
   }
   hideOverlay();
 }
 
-// ── 내보내기 ────────────────────────────────────────
+// ── 내보내기 ─────────────────────────────────────────
 async function exportCsv(filter) {
   showOverlay('데이터 내보내기 준비 중...', '전체 준비물 목록을 가져옵니다.');
-  const key = role === 'admin' ? loginCode : '';
+  const key  = role === 'admin'  ? loginCode : '';
   const vKey = role === 'vendor' ? loginCode : '';
-  const res = await api({ action: 'exportAll', adminKey: key, vendorKey: vKey });
+  const res  = await api({ action: 'exportAll', adminKey: key, vendorKey: vKey });
   hideOverlay();
   if (!res.ok) { alert(res.msg); return; }
 
@@ -827,35 +753,66 @@ async function exportCsv(filter) {
   a.click();
 }
 
-// Drive 공유 URL → 직접 임베드 가능한 URL로 변환
 function driveImgUrl(url) {
   if (!url) return '';
-  // file/d/{ID}/view 형식
   const m1 = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
   if (m1) return 'https://lh3.googleusercontent.com/d/' + m1[1];
-  // uc?id={ID} 형식 (구형)
   const m2 = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
   if (m2) return 'https://lh3.googleusercontent.com/d/' + m2[1];
   return url;
 }
 
+// ── 강좌별 신청서 미리보기 ───────────────────────────
+// ★ 수정: async로 변경, c.supplies 없으면 getCourseDetail 먼저 fetch
+async function previewSheet() {
+  const code = document.getElementById('exportCourseSelect').value;
+  if (!code) { alert('강좌를 선택해주세요.'); return; }
+
+  const c = allCourses.find(x => String(x.courseCode).toUpperCase() === code.toUpperCase());
+  if (!c) return;
+
+  // 상세 데이터가 아직 로드되지 않은 경우 먼저 fetch
+  if (!c.supplies) {
+    showOverlay('강좌 정보 불러오는 중...', `[${code}] 신청 내역을 가져옵니다.`);
+    try {
+      const key = role === 'admin'  ? { adminKey:  loginCode }
+                : role === 'vendor' ? { vendorKey: loginCode }
+                : { univCode: loginCode };
+      const res = await api({ action: 'getCourseDetail', courseCode: code, ...key });
+      if (res.ok) {
+        c.supplies    = res.supplies  || [];
+        c.delivery    = res.delivery  || null;
+        c.totalCost   = res.totalCost || 0;
+        c.hasDelivery = !!res.delivery;
+        // 강좌현황 카드가 이미 열려있다면 loaded 플래그 초기화
+        const inner = document.getElementById('det_inner_' + code);
+        if (inner) inner.dataset.loaded = '1';
+      } else {
+        hideOverlay();
+        alert('강좌 정보를 불러오지 못했습니다: ' + res.msg);
+        return;
+      }
+    } catch(e) {
+      hideOverlay();
+      alert('강좌 정보를 불러오지 못했습니다.');
+      return;
+    }
+    hideOverlay();
   }
- 
-  // ── 이하 기존 코드 그대로 ──────────────────────────────
+
+  // 미리보기 렌더링
   const d = c.delivery || {};
- 
   let supplyRows = '';
   let totalAmt = 0;
-  const hasEstimate = (c.supplies || []).some(s => s.purchaseType === '견적서');
- 
+
   if (c.noSupply) {
-    supplyRows = `<tr><td class="left" colspan="6">해당없음 (준비물 없음)</td></tr>`;
+    supplyRows = `<tr><td class="left" colspan="7">해당없음 (준비물 없음)</td></tr>`;
   } else if (!c.supplies || !c.supplies.length) {
-    supplyRows = `<tr><td class="left" colspan="6">미신청</td></tr>`;
+    supplyRows = `<tr><td class="left" colspan="7">미신청</td></tr>`;
   } else {
     c.supplies.forEach((s, i) => {
-      const sub = Number(s.subTotal) || 0;
-      const ship = Number(s.shipping) || 0;
+      const sub   = Number(s.subTotal)  || 0;
+      const ship  = Number(s.shipping)  || 0;
       const total = sub + ship;
       totalAmt += total;
       const linkCell = s.purchaseType === '견적서'
@@ -873,8 +830,9 @@ function driveImgUrl(url) {
         </tr>`;
     });
   }
- 
-  const estimateImgs = (c.supplies || []).filter(s => s.purchaseType === '견적서' && s.estimateUrl)
+
+  const estimateImgs = (c.supplies || [])
+    .filter(s => s.purchaseType === '견적서' && s.estimateUrl)
     .map(s => {
       const imgUrl = driveImgUrl(s.estimateUrl);
       return `
@@ -889,7 +847,7 @@ function driveImgUrl(url) {
           </div>
         </div>`;
     }).join('');
- 
+
   document.getElementById('sheetPreview').innerHTML = `
     <div class="vendor-sheet" id="printArea">
       <div class="vs-title">대학연계 참학력 공동교육과정 수업운영비 신청서(${YEAR}학년도 ${TERM})</div>
@@ -903,7 +861,6 @@ function driveImgUrl(url) {
           <td class="lbl-cell">수령인명</td><td>${esc(d.recipient||'')} (${esc(d.phone||'')})</td>
         </tr>
       </table>
- 
       <table class="vs-table">
         <thead>
           <tr>
@@ -913,8 +870,8 @@ function driveImgUrl(url) {
         </thead>
         <tbody>${supplyRows}</tbody>
       </table>
-      ${!c.noSupply && c.supplies && c.supplies.length ? `<div class="vs-total">총합계: ${fmt(totalAmt)}원</div>` : ''}
- 
+      ${!c.noSupply && c.supplies && c.supplies.length
+        ? `<div class="vs-total">총합계: ${fmt(totalAmt)}원</div>` : ''}
       ${estimateImgs ? `<div class="vs-est">견적서(이미지 첨부)</div>${estimateImgs}` : ''}
     </div>
   `;
@@ -922,51 +879,45 @@ function driveImgUrl(url) {
 
 function printSheet() {
   const content = document.getElementById('sheetPreview');
-  if (!content || !content.innerHTML.trim()) { alert('먼저 강좌를 선택하고 미리보기를 눌러주세요.'); return; }
-
+  if (!content || !content.innerHTML.trim()) {
+    alert('먼저 강좌를 선택하고 "미리보기" 버튼을 눌러주세요.');
+    return;
+  }
   const win = window.open('', '_blank', 'width=800,height=900');
   win.document.write(`<!DOCTYPE html>
-<html lang="ko">
-<head>
+<html lang="ko"><head>
 <meta charset="UTF-8">
 <title>${YEAR}학년도 ${TERM} 수업운영비 신청서</title>
 <style>
-  body { font-family: 'Noto Sans KR', sans-serif; margin: 20px; color: #000; }
-  .vs-title { text-align:center; font-size:15px; font-weight:700; margin-bottom:12px; }
-  .vs-info-table { width:100%; border-collapse:collapse; margin-bottom:12px; font-size:12px; }
-  .vs-info-table td { padding:5px 10px; border:1px solid #999; }
-  .vs-info-table .lbl-cell { background:#f0f0f0; font-weight:500; width:80px; }
-  .vs-table { width:100%; border-collapse:collapse; font-size:12px; margin-bottom:8px; }
-  .vs-table th { background:#e8eaf6; padding:6px 8px; border:1px solid #999; text-align:center; font-weight:700; }
-  .vs-table td { padding:5px 8px; border:1px solid #999; text-align:right; }
-  .vs-table td.left { text-align:left; }
-  .vs-table td.center { text-align:center; }
-  .vs-total { text-align:right; font-size:13px; font-weight:700; margin-top:6px; }
-  .vs-est { margin-top:14px; font-size:12px; font-weight:700; }
-  .vs-est-img { max-width:100%; margin-top:8px; border:1px solid #ddd; border-radius:4px; display:block; }
-  a { color:#1a56db; }
-  @media print { body { margin:10px; } }
+  body{font-family:'Noto Sans KR',sans-serif;margin:20px;color:#000}
+  .vs-title{text-align:center;font-size:15px;font-weight:700;margin-bottom:12px}
+  .vs-info-table{width:100%;border-collapse:collapse;margin-bottom:12px;font-size:12px}
+  .vs-info-table td{padding:5px 10px;border:1px solid #999}
+  .vs-info-table .lbl-cell{background:#f0f0f0;font-weight:500;width:80px}
+  .vs-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:8px}
+  .vs-table th{background:#e8eaf6;padding:6px 8px;border:1px solid #999;text-align:center;font-weight:700}
+  .vs-table td{padding:5px 8px;border:1px solid #999;text-align:right}
+  .vs-table td.left{text-align:left}.vs-table td.center{text-align:center}
+  .vs-total{text-align:right;font-size:13px;font-weight:700;margin-top:6px}
+  .vs-est{margin-top:14px;font-size:12px;font-weight:700}
+  .vs-est-img{max-width:100%;margin-top:8px;border:1px solid #ddd;border-radius:4px;display:block}
+  a{color:#1a56db}
+  @media print{body{margin:10px}}
 </style>
-</head>
-<body>
+</head><body>
 ${content.innerHTML}
 <script>
-  // 이미지 로딩 완료 후 인쇄
   const imgs = document.querySelectorAll('img');
-  if (imgs.length === 0) {
-    window.print();
-  } else {
+  if (!imgs.length) { window.print(); }
+  else {
     let loaded = 0;
     imgs.forEach(img => {
-      if (img.complete) { loaded++; if (loaded === imgs.length) window.print(); }
-      else {
-        img.onload = img.onerror = () => { loaded++; if (loaded === imgs.length) window.print(); };
-      }
+      if (img.complete) { if (++loaded === imgs.length) window.print(); }
+      else { img.onload = img.onerror = () => { if (++loaded === imgs.length) window.print(); }; }
     });
   }
 <\/script>
-</body>
-</html>`);
+</body></html>`);
   win.document.close();
 }
 
@@ -975,7 +926,7 @@ async function exportAllSheets() {
   await exportCsv('all');
 }
 
-// ── 유틸 ───────────────────────────────────────────
+// ── 유틸 ─────────────────────────────────────────────
 function showOverlay(title, sub) {
   document.getElementById('ovTitle').textContent = title;
   document.getElementById('ovSub').textContent = sub || 'Google 서버와 통신 중입니다.\n잠시만 기다려주세요.';
